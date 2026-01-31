@@ -40,6 +40,18 @@ if (window.initialStatus) {
     const display = document.getElementById('timer-display');
 
     if (display) {
+        // VISIBILITY ENFORCER (The Watcher)
+        document.addEventListener("visibilitychange", () => {
+            if (document.hidden) {
+                // If they leave, we can either:
+                // 1. Break session immediately (Hardcore)
+                // 2. Play a sound / Alert
+                // 3. Just log it? 
+                // Let's do a hard alert for now
+                alert("⚠️ FOCUS BREACH DETECTED ⚠️\n\nReturning to non-focus windows is prohibited.");
+            }
+        });
+
         const interval = setInterval(() => {
             remaining--;
             

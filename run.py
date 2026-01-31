@@ -22,6 +22,17 @@ def focus():
 def excuse():
     return render_template('excuse.html')
 
+@app.route('/analytics')
+def analytics():
+    # We need to expose history from engine
+    events = engine.store.get_events()
+    # Simple aggregations
+    total = sum(1 for e in events if e['type'] == 'SESSION_START')
+    broken = sum(1 for e in events if e['type'] == 'SESSION_BROKEN')
+    rate = int(((total - broken) / total * 100)) if total > 0 else 100
+    
+    return render_template('analytics.html', events=reversed(events), total_sessions=total, failures=broken, success_rate=rate)
+
 @app.route('/api/start', methods=['POST'])
 def start_session():
     data = request.json

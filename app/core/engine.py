@@ -1,71 +1,64 @@
 from datetime import datetime, timedelta
-from .store import Store
+from .store import EventStore
 
 class FocusEngine:
     def __init__(self):
-        self.store = Store()
+        self.store = EventStore()
 
     def start_session(self, duration_minutes, mode="deep"):
-        """Starts a new focus session."""
+        """Starts a new focus session via Event."""
         if self.store.get_current_session():
             raise Exception("Session already active")
 
+        # Calculate expectations (but don't store "State", store "Intent")
         now = datetime.now()
         end_time = now + timedelta(minutes=int(duration_minutes))
 
-        session = {
-            "start_time": now.isoformat(),
+        payload = {
+            "expected_duration": int(duration_minutes),
             "expected_end_time": end_time.isoformat(),
-            "duration_minutes": duration_minutes,
-            "mode": mode,
-            "status": "active"
+            "mode": mode
         }
-        self.store.set_current_session(session)
-        return session
+        self.store.append_event("SESSION_START", payload)
+        return payload
 
     def get_status(self):
-        """Returns the current state of the system."""
+        """Reconstructs status from the Event Store."""
         session = self.store.get_current_session()
         if not session:
             return {"active": False}
         
         now = datetime.now()
+        # session['expected_end_time'] comes from the payload
         end_time = datetime.fromisoformat(session["expected_end_time"])
         
         if now >= end_time:
-            # Natural completion
+            # It's technically complete time-wise, but needs an event to close it officially?
+            # For now, let's say it's "Done" but waiting for user to acknowledge?
+            # Or we auto-complete? Let's suggest auto-complete logic in client/next ping.
             return {"active": True, "remaining": 0, "completed": True}
         
         remaining = (end_time - now).total_seconds()
         return {
             "active": True,
             "remaining": int(remaining),
-            "total": int(session["duration_minutes"]) * 60,
+            "total": int(session["expected_duration"]) * 60,
             "mode": session["mode"]
         }
 
     def break_session(self, excuse):
-        """Forcefully breaks a session with an excuse."""
+        """Logs a failure event."""
         session = self.store.get_current_session()
         if not session:
             return None
         
-        session["status"] = "broken"
-        session["actual_end_time"] = datetime.now().isoformat()
-        session["excuse"] = excuse
-        
-        self.store.add_session_to_history(session)
-        self.store.set_current_session(None)
-        return session
+        self.store.append_event("SESSION_BROKEN", {"excuse": excuse})
+        return {"status": "broken"}
 
     def complete_session(self):
-        """Marks a session as successfully completed."""
+        """Logs a completion event."""
         session = self.store.get_current_session()
         if not session:
             return
             
-        session["status"] = "completed"
-        session["actual_end_time"] = datetime.now().isoformat()
-        
-        self.store.add_session_to_history(session)
-        self.store.set_current_session(None)
+        self.store.append_event("SESSION_COMPLETE", {})
