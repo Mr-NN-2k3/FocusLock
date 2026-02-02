@@ -8,7 +8,8 @@ engine = FocusEngine()
 @app.route("/")
 def index():
     status = engine.get_status()
-    if status.get("active"):
+    # ONLY Deep Work (Strict) forces you into the lock screen
+    if status.get("active") and status.get("mode") == "deep":
         return render_template("focus.html", status=status)
     return render_template("index.html", status=status)
 
@@ -43,8 +44,20 @@ def analytics():
 @app.route("/api/start", methods=["POST"])
 def api_start():
     data = request.json
-    engine.start_session(data["duration"], data["mode"])
+    keywords = data.get("allowed_keywords", "").split(",")
+    engine.start_session(data["duration"], data["mode"], allowed_keywords=keywords)
     return jsonify({"status": "started"})
+
+
+@app.route("/api/afk", methods=["POST"])
+def api_afk():
+    data = request.json
+    if data.get("status"):
+        engine.pause_session()
+        return jsonify({"status": "paused"})
+    else:
+        engine.resume_session()
+        return jsonify({"status": "resumed"})
 
 
 @app.route("/api/status")
@@ -56,6 +69,12 @@ def api_status():
 def api_violation():
     engine.register_violation(request.json["type"])
     return jsonify({"status": "logged"})
+
+
+@app.route("/api/evaluate", methods=["POST"])
+def api_evaluate():
+    result = engine.classify_activity(request.json["reason"])
+    return jsonify({"classification": result})
 
 
 @app.route("/api/heartbeat", methods=["POST"])
