@@ -1,139 +1,140 @@
-#FocusLock
 
-“Authority over your own mind.”
+# FocusLock
 
-FocusLock is a behavior enforcement system for deep work.
-It replaces motivation with rules, accountability, and server-side authority.
+**Authority over your own mind.**
 
-This is not a typical Pomodoro or focus timer.
-FocusLock treats focus as a contract — once started, it cannot be casually abandoned without consequence.
+FocusLock is a **behavior enforcement system for deep work**.  
+It replaces motivation with **rules, accountability, and server-side authority**.
 
-🧠 Core Philosophy
+This is **not** a Pomodoro timer.  
+FocusLock treats focus as a **contract** — once started, it cannot be casually abandoned without consequence.
 
-System > User
-The system is the authority. User actions are requests, not commands.
+---
 
-Time Is Sacred
-All timing is enforced server-side. The client never decides time.
+## 🧠 Core Philosophy
 
-Failure Is Allowed, Denial Is Not
-Breaking focus requires an explicit excuse, permanently logged.
+### System > User
+The system is the authority.  
+User actions are *requests*, not commands.
 
-History Is Truth
-All behavior is recorded as append-only events. No silent edits. No state overwrites.
+### Time Is Sacred
+All timing is enforced **server-side**.  
+The client never decides time.
 
-🚀 Features
-✅ Implemented (MVP Authority)
+### Failure Is Allowed, Denial Is Not
+Breaking focus requires an **explicit excuse**, permanently logged.
 
-Server-Authoritative Focus Sessions
+### History Is Truth
+All behavior is recorded as **append-only events**.  
+No silent edits. No state overwrites.
 
-Sessions are enforced by backend time, not client timers.
+---
 
-Event-Sourced Architecture
+## 🚀 Features
 
-All actions (START, BROKEN, COMPLETE) are stored as immutable events in SQLite.
+### ✅ Implemented (MVP Authority)
 
-Forced Excuse Logging
+- **Server-Authoritative Focus Sessions**  
+  Sessions are enforced by backend time, never client timers.
 
-You cannot end a session without admitting why you failed.
+- **Event-Sourced Architecture**  
+  All actions (`START`, `BROKEN`, `COMPLETE`) are stored as immutable events in SQLite.
 
-Single Active Session Rule
+- **Forced Excuse Logging**  
+  You cannot end a session without admitting why you failed.
 
-Only one focus contract can exist at a time.
+- **Single Active Session Rule**  
+  Only one focus contract may exist at a time.
 
-Glassmorphism “System UI”
+- **Glassmorphism System UI**  
+  High-contrast, distraction-free interface designed to induce flow.
 
-High-contrast, distraction-free interface designed to induce flow.
+- **Analytics & Event Stream**  
+  Visual audit of behavior and session outcomes.
 
-Analytics & Event Stream
+---
 
-Visual audit of your behavior and session outcomes.
+### 🧪 In Progress (Advanced V1)
 
-🧪 In Progress (Advanced V1)
+- Progressive penalties for breaking focus  
+- Tab-switch and visibility violation logging  
+- Failure pattern analytics (time-based, reason-based)  
+- Suspicious offline gap detection  
 
-Progressive penalties for breaking focus
+---
 
-Tab-switch and visibility violation logging
+### 🔮 Planned (Flagship V2)
 
-Failure pattern analytics (time-based, reason-based)
+- Predictive focus-failure warnings  
+- **Focus Debt** system (unpaid minutes accumulate)  
+- Offline-resilient, local-first sync  
+- Cryptographic integrity (tamper-evident event history)
 
-Suspicious offline gap detection
+---
 
-🔮 Planned (Flagship V2)
+## 🏗 Architecture Overview
 
-Predictive focus failure warnings
+### Backend — Authority Layer
 
-Focus Debt system (unpaid minutes accumulate)
+- Python 3  
+- Flask  
+- SQLite (Append-Only Event Log)
 
-Offline-resilient local-first sync
+The backend is the **single source of truth** for:
 
-Cryptographic integrity (tamper-evident event history)
+- session state  
+- time progression  
+- behavioral history  
 
-🏗 Architecture Overview
-Backend (Authority Layer)
+---
 
-Python 3
+### Frontend — Execution Layer
 
-Flask
-
-SQLite (Append-Only Event Log)
-
-The backend is the single source of truth for:
-
-session state
-
-time progression
-
-behavioral history
-
-Frontend (Execution Layer)
-
-HTML5 / CSS3
-
-Vanilla JavaScript
-
-Glassmorphism UI with strict visual hierarchy
+- HTML5 / CSS3  
+- Vanilla JavaScript  
+- Glassmorphism UI with strict visual hierarchy  
 
 The frontend:
 
-displays state
+- displays state  
+- reports user actions  
+- **never enforces rules**
 
-reports user actions
+---
 
-never enforces rules
+## 🧾 Event-Sourced Design
 
-🧾 Event-Sourced Design
+FocusLock stores **no mutable session state**.
 
-FocusLock does not store mutable session state.
+Instead, it records events:
 
-Instead, it stores events:
+- `SESSION_START`  
+- `SESSION_BREAK_ATTEMPT`  
+- `SESSION_BROKEN`  
+- `SESSION_COMPLETE`
 
-SESSION_START
-SESSION_BREAK_ATTEMPT
-SESSION_BROKEN
-SESSION_COMPLETE
-
-
-All current state is derived by replaying events.
+All current state is **derived by replaying events**.
 
 This enables:
 
-behavioral analytics
+- behavioral analytics  
+- tamper detection  
+- focus-debt calculation  
+- future AI prediction
 
-tamper detection
+---
 
-focus debt calculation
+## 📂 Project Structure
 
-future AI prediction
+```
 
-📂 Project Structure
 focuslock/
 │
 ├── app/
 │   ├── core/
 │   │   ├── engine.py        # Focus logic & authority
 │   │   ├── store.py         # Event-sourced SQLite store
-│   │   └── __init__.py
+│   │   └── **init**.py
 │   │
 │   ├── templates/
 │   │   ├── base.html
@@ -152,89 +153,99 @@ focuslock/
 ├── run.py                   # Application entry point
 └── README.md
 
-▶️ How to Run FocusLock
-1️⃣ Prerequisites
+````
 
-Python 3.9+
+---
 
-pip (Python package manager)
+## ▶️ Running FocusLock
 
-2️⃣ Install Dependencies
+### 1️⃣ Prerequisites
+
+- Python 3.9+  
+- pip  
+
+### 2️⃣ Install Dependencies
+
+```bash
 pip install flask
-
+````
 
 (No heavy frameworks. No unnecessary dependencies.)
 
-3️⃣ Start the System
+### 3️⃣ Start the System
+
+```bash
 python run.py
+```
 
-4️⃣ Access the Interface
+### 4️⃣ Open the Interface
 
-Open your browser and go to:
+Navigate to:
 
+```
 http://localhost:5000
+```
 
-🔐 System Rules (Important)
+---
 
-You cannot start a new session if one is already active.
+## 🔐 System Rules (Non-Negotiable)
 
-You cannot end a session silently.
+* You cannot start a new session if one is already active.
+* You cannot end a session silently.
+* All failures are logged permanently.
+* The system’s record is final.
 
-All failures are logged permanently.
+Deleting the database is equivalent to **resetting your discipline history**.
 
-The system’s record is final.
+---
 
-Deleting the database is equivalent to resetting your discipline history.
-
-📊 Analytics
+## 📊 Analytics
 
 Visit:
 
+```
 /analytics
+```
 
+View:
 
-To view:
+* total sessions
+* failures
+* consistency rate
+* full event stream
 
-total sessions
+This is a **behavioral audit**, not motivation fluff.
 
-failures
+---
 
-consistency rate
+## 🧑‍💻 Contributors
 
-full event stream
+* **Nitin**
+* **Nevil**
 
-This is a behavioral audit, not motivation fluff.
+---
 
-🧑‍💻 Contributors
-
-Niitin
-
-Nevil
-
-📌 Positioning (For Evaluators & Recruiters)
+## 📌 Positioning (For Evaluators & Recruiters)
 
 FocusLock demonstrates:
 
-event-sourced backend design
+* event-sourced backend design
+* authoritative state control
+* disciplined system architecture
+* psychological UX aligned with product goals
 
-authoritative state control
+Correctness, authority, and integrity are prioritized over convenience.
 
-disciplined system architecture
+---
 
-psychological UX aligned with product goals
-
-This project prioritizes correctness, authority, and integrity over convenience.
-
-⚠️ Disclaimer
+## ⚠️ Disclaimer
 
 FocusLock is intentionally strict.
 
 If you are looking for:
 
-gentle reminders
+* gentle reminders
+* flexible timers
+* motivational quotes
 
-flexible timers
-
-motivational quotes
-
-This system is not for you.
+**This system is not for you.**
