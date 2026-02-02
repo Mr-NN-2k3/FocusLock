@@ -16,13 +16,13 @@ The core principle is **System > User**.
 ## Phase 2: Advanced V1 (Next Target)
 *Goal: "The Watcher" - Systems that detect and punish patterns.*
 - [x] **Context-Aware Blocking**: Implemented via Page Visibility API (User cannot leave tab).
-- [ ] **Progressive Penalties**: Breaking focus costs time (Cool-downs).
+- [x] **Progressive Penalties**: Breaking focus costs time (Cool-downs).
 - [x] **Failure Pattern Mining**: Visualizing *why* you break (Analytics Dashboard).
-- [ ] **Tamper Detection**: flagging suspicious "offline" gaps.
+- [x] **Tamper Detection**: flagging suspicious "offline" gaps.
 
 ## Phase 3: Flagship V2 (The Ideal)
 *Goal: "The Predictive Cage" - AI and deep psychological locks.*
-- [ ] **Focus Failure Prediction**: AI warns you before you break.
+- [x] **Focus Failure Prediction**: AI warns you before you break.
 - [ ] **Focus Debt System**: Unpaid focus minutes accumulate.
 - [ ] **Offline-Resilience**: Local-first sync.
 - [ ] **Cryptographic Integrity**: Hashing history so it cannot be edited.
