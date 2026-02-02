@@ -11,6 +11,24 @@ FocusLock treats focus as a **contract** — once started, it cannot be casually
 
 ---
 
+## 🆕 What's New (v1.1)
+
+### 👁️ Intelligent Pattern Monitoring
+The system now watches *you*.
+- **Active Window Tracking**: FocusLock monitors your active applications. If you switch to an unauthorized window (e.g., social media, games), the system detects it immediately.
+- **Distraction Flashing**: The interface aggressively flashes red to snap you out of a distraction loop.
+
+### ⚖️ The AI Court
+Context switching is sometimes necessary, but never free.
+- **Justification Required**: If you leave the focus window, you must explain why.
+- **Automated Judgment**: The system evaluates your excuse. Valid research is allowed; vague excuses are penalized as violations.
+
+### 🔀 Conditional Deep Work
+- **Standard Mode**: strict timing, but standard app permissions.
+- **Deep Mode**: Total lockdown. Fullscreen enforcement, strict window monitoring, and zero tolerance for unrelated activities.
+
+---
+
 ## 🧠 Core Philosophy
 
 ### System > User
