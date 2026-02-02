@@ -34,7 +34,10 @@ class FocusEngine:
     def get_status(self):
         session = self.store.get_current_session()
         if not session:
-            return {"active": False}
+            return {
+                "active": False, 
+                "focus_debt": self.store.calculate_focus_debt()
+            }
 
         now = datetime.now()
         base_end = datetime.fromisoformat(session["expected_end_time"])
@@ -49,7 +52,11 @@ class FocusEngine:
                     "SESSION_COMPLETE",
                     {"session_id": session["session_id"]}
                 )
-            return {"active": False, "completed": True}
+            return {
+                "active": False, 
+                "completed": True,
+                "focus_debt": self.store.calculate_focus_debt()
+            }
 
         remaining = int((adjusted_end - now).total_seconds())
 
@@ -60,7 +67,8 @@ class FocusEngine:
             "active": True,
             "remaining": remaining,
             "penalties": penalty_seconds,
-            "prediction": prediction
+            "prediction": prediction,
+            "focus_debt": self.store.calculate_focus_debt()
         }
 
     # -------- VIOLATIONS --------

@@ -5,6 +5,13 @@
     <h1>FocusLock</h1>
     <p class="subtitle">Master your attention. Dictate your time.</p>
 
+    {% if status.focus_debt > 0 %}
+    <div class="debt-alert">
+        <strong>FOCUS DEBT:</strong> {{ status.focus_debt }} MINUTES
+        <p class="small">You owe this time to your future self.</p>
+    </div>
+    {% endif %}
+
     <div class="input-group">
         <label>Session Type</label>
         <select id="mode">
@@ -22,5 +29,25 @@
     <div style="text-align: center; margin-top: 1rem;">
         <a href="/analytics" style="color: var(--color-primary-dim); text-decoration: none; font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase;">View System Report</a>
     </div>
+
+    <div class="system-status">
+        <span id="integrity-status" class="status-item">Checking Integrity...</span>
+        <span class="status-item">Local Storage: Active</span>
+    </div>
+
+    <script>
+        fetch('/api/integrity')
+            .then(r => r.json())
+            .then(data => {
+                const el = document.getElementById('integrity-status');
+                if (data.valid) {
+                    el.innerText = "✓ System Integrity Verified";
+                    el.style.color = "#00ff00";
+                } else {
+                    el.innerText = "⚠ " + data.message;
+                    el.style.color = "#ff0000";
+                }
+            });
+    </script>
 </div>
 {% endblock %}

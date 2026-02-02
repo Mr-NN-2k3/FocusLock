@@ -10,7 +10,7 @@ def index():
     status = engine.get_status()
     if status.get("active"):
         return render_template("focus.html", status=status)
-    return render_template("index.html")
+    return render_template("index.html", status=status)
 
 
 @app.route("/excuse")
@@ -68,6 +68,12 @@ def api_heartbeat():
 def api_break():
     engine.break_session(request.json["excuse"])
     return jsonify({"status": "broken"})
+
+
+@app.route("/api/integrity")
+def api_integrity():
+    valid, message = engine.store.verify_integrity()
+    return jsonify({"valid": valid, "message": message})
 
 
 if __name__ == "__main__":

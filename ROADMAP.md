@@ -23,9 +23,9 @@ The core principle is **System > User**.
 ## Phase 3: Flagship V2 (The Ideal)
 *Goal: "The Predictive Cage" - AI and deep psychological locks.*
 - [x] **Focus Failure Prediction**: AI warns you before you break.
-- [ ] **Focus Debt System**: Unpaid focus minutes accumulate.
-- [ ] **Offline-Resilience**: Local-first sync.
-- [ ] **Cryptographic Integrity**: Hashing history so it cannot be edited.
+- [x] **Focus Debt System**: Unpaid focus minutes accumulate.
+- [x] **Offline-Resilience**: Local-first sync.
+- [x] **Cryptographic Integrity**: Hashing history so it cannot be edited.
 
 ---
 

@@ -81,6 +81,9 @@ function submitExcuse() {
 
 // -------- VISIBILITY VIOLATION (WATCHER) --------
 document.addEventListener("visibilitychange", () => {
+    // Only monitor visibility if we are in an active session
+    if (!window.initialStatus) return;
+
     if (document.hidden) {
         fetch("/api/violation", {
             method: "POST",
@@ -97,6 +100,8 @@ document.addEventListener("visibilitychange", () => {
 
 // -------- HEARTBEAT (ANTI-TAMPER) --------
 setInterval(() => {
+    if (!window.initialStatus) return;
+    
     fetch("/api/heartbeat", { method: "POST" })
         .catch(() => {}); // silent
 }, 5000);
@@ -104,6 +109,7 @@ setInterval(() => {
 // -------- SERVER-AUTH TIMER + PREDICTION --------
 if (window.initialStatus) {
     const display = document.getElementById("timer-display");
+    let lastPredictionHash = "";
 
     setInterval(() => {
         fetch("/api/status")
@@ -127,10 +133,14 @@ if (window.initialStatus) {
 
                 // ---- FAILURE PREDICTION WARNING ----
                 if (data.prediction && data.prediction.warning) {
-                    alert(
-                        "⚠️ FOCUS FAILURE PREDICTED\n\n" +
-                        data.prediction.reasons.join("\n")
-                    );
+                    const currentHash = data.prediction.reasons.join("|");
+                    if (currentHash !== lastPredictionHash) {
+                        alert(
+                            "⚠️ FOCUS FAILURE PREDICTED\n\n" +
+                            data.prediction.reasons.join("\n")
+                        );
+                        lastPredictionHash = currentHash;
+                    }
                 }
             })
             .catch(() => {
