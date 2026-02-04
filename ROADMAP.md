@@ -1,36 +1,132 @@
-# FocusLock High-Level Roadmap
+# FocusLock – Engineering Roadmap
 
-## 🧭 Strategy
-We are following an engineering-first approach: **MVP Authority** -> **Advanced V1** -> **Flagship V2**.
-The core principle is **System > User**.
+## 🧭 Product Philosophy
+FocusLock treats productivity as a **contract**, not a preference.
+The system is designed to be **authoritative, auditable, and adversarial to self-deception**.
 
----
-
-## Phase 1: MVP Authority (Current)
-*Goal: Establishing the "Contract" and basic enforcement.*
-- [x] **Core Timer**: Server-side authoritative timing.
-- [x] **Basic Excuse**: Forcing honesty on failure.
-- [x] **Glass Interface**: Premium aesthetics (CSS Variables).
-- [x] **Event-Log Architecture**: Moving from state-overwrite to event-sourcing (Preparation for V1).
-
-## Phase 2: Advanced V1 (Next Target)
-*Goal: "The Watcher" - Systems that detect and punish patterns.*
-- [x] **Context-Aware Blocking**: Implemented via Page Visibility API (User cannot leave tab).
-- [x] **Progressive Penalties**: Breaking focus costs time (Cool-downs).
-- [x] **Failure Pattern Mining**: Visualizing *why* you break (Analytics Dashboard).
-- [x] **Tamper Detection**: flagging suspicious "offline" gaps.
-
-## Phase 3: Flagship V2 (The Ideal)
-*Goal: "The Predictive Cage" - AI and deep psychological locks.*
-- [x] **Focus Failure Prediction**: AI warns you before you break.
-- [ ] **Focus Debt System**: Unpaid focus minutes accumulate.
-- [ ] **Offline-Resilience**: Local-first sync.
-- [ ] **Cryptographic Integrity**: Hashing history so it cannot be edited.
+Core Principle:
+> **System Authority > User Intent**
 
 ---
 
-## 🏗 Architectural Decision Record (ADR)
-**Decision 001: Event-Sourced Persistence**
-*   **Context**: Advanced features (Analytics, Tamper Detection, Replay) require full history, not just current state.
-*   **Decision**: Move `Store` from "Snapshot" (overwriting JSON) to "Append-Only Event Log" (SQLite/JSON Lines).
-*   **Benefit**: Enables "Time Travel" debugging of user behavior and "Focus Debt" calculation.
+## 🧱 Architecture Strategy
+We follow a staged hardening approach:
+
+1. **MVP Authority** – Establish trust in time, state, and enforcement
+2. **Advanced V1** – Detect patterns, punish abuse, and surface insight
+3. **Flagship V2** – Predict failure and adapt enforcement dynamically
+
+The persistence model is **event-sourced**, enabling replay, analytics, and tamper detection.
+
+---
+
+## Phase 1: MVP Authority ✅
+**Goal:** Establish a non-negotiable focus contract.
+
+### Implemented
+- Server-authoritative focus timer
+- Explicit session start / end / break events
+- Mandatory excuse logging on failure
+- Glass-style UI with CSS variables
+- Append-only event log (event-sourced persistence)
+
+**Outcome:**  
+Sessions are authoritative, immutable, and auditable.
+
+---
+
+## Phase 2: Advanced V1 ✅
+**Codename:** *The Watcher*  
+**Goal:** Detect abuse patterns and enforce progressive discipline.
+
+### Implemented
+- **Active Window Monitoring**: Hooks into OS APIs (`user32.dll`) to track foreground apps.
+- **Conditional Deep Work**: "Standard" (Timer only) vs "Deep" (Full Enforcement) modes.
+- **The AI Court (Alpha)**: Keyword-based evaluation of context switching excuses.
+- **Distraction Flashing**: Aggressive visual intervention on violation.
+- Context-aware attention enforcement (tab-level)
+- Progressive penalty system (cooldowns, time cost)
+- Failure pattern analytics dashboard
+- Tamper detection (offline gaps, suspicious exits)
+
+**Outcome:**  
+The system actively resists avoidance and self-negotiation.
+
+---
+
+## Phase 3: Flagship V2 ✅
+**Codename:** *The Predictive Cage*  
+**Goal:** Anticipate failure and adapt enforcement preemptively.
+
+### Implemented
+- Focus failure prediction (behavior-based)
+- Focus debt accumulation model
+- Local-first continuity with deferred sync
+- Cryptographic hashing of historical events
+
+**Outcome:**  
+FocusLock predicts and constrains failure before it occurs.
+
+---
+
+## Phase 4: System Hardening (Next)
+**Goal:** Production-grade correctness and explainability.
+
+### Planned
+- Explicit finite state machine for sessions
+- Integrity / Trust Index (hidden system metric)
+- Policy engine (rules as data, not code)
+- Structured observability (state + penalty logs)
+- Replay & simulation mode
+
+**Outcome:**  
+The system becomes explainable, debuggable, and extensible.
+
+---
+
+## Phase 5: Adaptive Intelligence & Expansion (Future)
+**Goal:** Controlled adaptability without losing authority.
+
+### Planned
+- **Local LLM Integration**: Replace keyword matching with local LLM (Phi-2/Mistral) for true semantic understanding.
+- **Process Termination**: Move from "warning" to "killing" distraction processes.
+- **AI Explainability Layer**: Why did the system judge this as a distraction?
+- **Adaptive Penalties**: Based on trust score.
+- **Behavioral Profiles**: Exam / Recovery / Lockdown presets.
+- **Smart Resumption**: Auto-continue if distraction was accidental/brief.
+
+---
+
+## Phase 6: Social & Physical Protocols (Long Term)
+**Goal:** External accountability.
+
+### Planned
+- **Multiplayer Contracts**: Linked sessions. If one fails, both fail.
+- **Hardware Locks**: Router API integration to kill internet.
+- **Public Debt Ledger**: Exposing Focus Debt to a public URL.
+
+---
+
+## 📜 Architectural Decision Records (ADR)
+
+### ADR-001: Event-Sourced Persistence
+**Context:**  
+Advanced analytics, tamper detection, replay, and focus debt require full historical fidelity.
+
+**Decision:**  
+Replace state-overwrite persistence with an append-only event log (SQLite / JSONL).
+
+**Consequences:**  
+- Enables time-travel debugging
+- Simplifies analytics derivation
+- Prevents silent history mutation
+
+---
+
+## 🚧 Non-Goals
+- Motivational content
+- Gamification
+- Social comparison
+- “Gentle” productivity nudges
+
+FocusLock is intentionally uncomfortable.

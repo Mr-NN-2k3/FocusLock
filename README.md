@@ -11,6 +11,24 @@ FocusLock treats focus as a **contract** — once started, it cannot be casually
 
 ---
 
+## 🆕 What's New (v1.1)
+
+### 👁️ Intelligent Pattern Monitoring
+The system now watches *you*.
+- **Active Window Tracking**: FocusLock monitors your active applications. If you switch to an unauthorized window (e.g., social media, games), the system detects it immediately.
+- **Distraction Flashing**: The interface aggressively flashes red to snap you out of a distraction loop.
+
+### ⚖️ The AI Court
+Context switching is sometimes necessary, but never free.
+- **Justification Required**: If you leave the focus window, you must explain why.
+- **Automated Judgment**: The system evaluates your excuse. Valid research is allowed; vague excuses are penalized as violations.
+
+### 🔀 Conditional Deep Work
+- **Standard Mode**: strict timing, but standard app permissions.
+- **Deep Mode**: Total lockdown. Fullscreen enforcement, strict window monitoring, and zero tolerance for unrelated activities.
+
+---
+
 ## 🧠 Core Philosophy
 
 ### System > User
@@ -40,8 +58,17 @@ No silent edits. No state overwrites.
 - **Event-Sourced Architecture**  
   All actions (`START`, `BROKEN`, `COMPLETE`) are stored as immutable events in SQLite.
 
+- **Cryptographic Event Chain**  
+  Every event is hashed (SHA-256) and linked to the previous event. Any manual editing of the database breaks the chain and triggers a system alert.
+
+- **Focus Debt System**  
+  Time owes you. If you break a session, the remaining time is added to your "Focus Debt". It accumulates until paid.
+
 - **Forced Excuse Logging**  
   You cannot end a session without admitting why you failed.
+
+- **Offline-Resilient Architecture**  
+  Local-first design ensures functionality without internet, syncing state upon reconnection.
 
 - **Single Active Session Rule**  
   Only one focus contract may exist at a time.
@@ -52,23 +79,15 @@ No silent edits. No state overwrites.
 - **Analytics & Event Stream**  
   Visual audit of behavior and session outcomes.
 
----
-
-### 🧪 In Progress (Advanced V1)
-
-- Progressive penalties for breaking focus  
-- Tab-switch and visibility violation logging  
-- Failure pattern analytics (time-based, reason-based)  
-- Suspicious offline gap detection  
+- **Predictive Failure Detection**  
+  Status checks analyze patterns (fatigue, violations) to warn of impending failure.
 
 ---
 
-### 🔮 Planned (Flagship V2)
+### 🧪 Future Experiments
 
-- Predictive focus-failure warnings  
-- **Focus Debt** system (unpaid minutes accumulate)  
-- Offline-resilient, local-first sync  
-- Cryptographic integrity (tamper-evident event history)
+- **Social Focus Contracts** (Multiplayer accountability)
+- **Hardware Integration** (Locking specific apps/sites via OS APIs)
 
 ---
 
@@ -78,13 +97,14 @@ No silent edits. No state overwrites.
 
 - Python 3  
 - Flask  
-- SQLite (Append-Only Event Log)
+- SQLite (Append-Only Event Log + SHA-256 Chain)
 
 The backend is the **single source of truth** for:
 
 - session state  
 - time progression  
 - behavioral history  
+- **integrity verification**
 
 ---
 
@@ -118,7 +138,7 @@ All current state is **derived by replaying events**.
 This enables:
 
 - behavioral analytics  
-- tamper detection  
+- tamper detection (via Hash Chain)  
 - focus-debt calculation  
 - future AI prediction
 
@@ -133,7 +153,7 @@ focuslock/
 ├── app/
 │   ├── core/
 │   │   ├── engine.py        # Focus logic & authority
-│   │   ├── store.py         # Event-sourced SQLite store
+│   │   ├── store.py         # Event-sourced SQLite store + Crypto
 │   │   └── **init**.py
 │   │
 │   ├── templates/
@@ -194,6 +214,7 @@ http://localhost:5000
 * You cannot end a session silently.
 * All failures are logged permanently.
 * The system’s record is final.
+* **Debts must be paid.**
 
 Deleting the database is equivalent to **resetting your discipline history**.
 
@@ -232,7 +253,8 @@ FocusLock demonstrates:
 * event-sourced backend design
 * authoritative state control
 * disciplined system architecture
-* psychological UX aligned with product goals
+* psychological UX (Focus Debt, Prediction)
+* cryptographic data integrity
 
 Correctness, authority, and integrity are prioritized over convenience.
 
