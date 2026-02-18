@@ -1,71 +1,96 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FocusLock | Authority</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@600;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
 
-{% block content %}
-<div class="glass-panel">
-    <h1>FocusLock</h1>
-    <p class="subtitle">Master your attention. Dictate your time.</p>
+    <!-- Background Animation -->
+    <div class="bg-grid"></div>
 
-    {% if status.focus_debt > 0 %}
-    <div class="debt-alert">
-        <strong>FOCUS DEBT:</strong> {{ status.focus_debt }} MINUTES
-        <p class="small">You owe this time to your future self.</p>
-    </div>
-    {% endif %}
+    <!-- Theme Toggle -->
+    <button id="theme-toggle" class="theme-toggle">THEME: DARK</button>
 
-    {% if status.active and status.mode == 'flow' %}
-    <div class="input-group" style="border: 1px solid var(--color-primary); padding: 1rem; text-align: center;">
-        <label>Standard Flow Active</label>
-        <h2 id="timer-display" style="color: var(--color-primary-glow); font-family: var(--font-mono); font-size: 2.5rem; margin: 1rem 0;">--:--</h2>
-        <button class="btn-danger" onclick="breakSession()" style="margin-top: 1rem; width: 100%;">End Session</button>
-    </div>
-    {% else %}
-    <div class="input-group">
-        <label>Session Type</label>
-        <select id="mode" onchange="toggleDeepSettings()">
-            <option value="deep">Deep Work (Strict)</option>
-            <option value="flow">Flow State (Standard)</option>
-        </select>
+    <!-- Violation Overlay (Hidden by default) -->
+    <div id="violation-overlay" class="violation-overlay hidden">
+        <h1>DISTRACTION<br>DETECTED</h1>
+        <p class="mono">CLOSE UNAUTHORIZED WINDOW TO RESUME</p>
     </div>
 
-    <div id="deep-settings" class="input-group">
-        <label>Allowed Contexts (comma separated)</label>
-        <input type="text" id="allowed-keywords" placeholder="e.g. VS Code, StackOverflow, DSA" value="dsa, coding">
-        <p class="small" style="margin-top:0.5rem; color:var(--color-text-muted);">
-            AI Monitor will flag any window title not matching these keywords.
-        </p>
+    <div class="neo-container">
+        <header style="text-align: center; margin-bottom: 2rem;">
+            <h1>Focus<span class="text-accent">Lock</span></h1>
+            <div style="display: flex; justify-content: center; gap: 1rem; margin-bottom: 0.5rem;">
+                <span class="status-pill active">LEVEL <span id="user-level">1</span></span>
+                <span class="status-pill">XP: <span id="user-xp">0</span></span>
+            </div>
+            <p class="mono text-muted">SYSTEM AUTHORITY: <span id="system-status" class="text-accent">ONLINE</span></p>
+        </header>
+
+        <!-- Active Session View -->
+        <div id="session-active-view" class="hidden">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <h2 id="timer-display" style="font-size: 4rem; font-family: var(--font-mono);">00:00</h2>
+                <p class="mono text-muted">REMAINING</p>
+            </div>
+
+            <div style="margin-bottom: 2rem;">
+                <p class="mono">STATUS: <span id="session-status-text" class="status-pill active">FOCUSED</span></p>
+                <p class="mono">PENALTIES: <span id="session-penalties" class="text-danger">0</span></p>
+            </div>
+
+            <button id="break-btn" class="btn" style="background: var(--danger);">EMERGENCY BREAK</button>
+        </div>
+
+        <!-- Setup View -->
+        <div id="session-setup-view">
+            <form id="start-form">
+                <div class="input-group">
+                    <label>Goal (Intent)</label>
+                    <input type="text" id="user-intent" placeholder="e.g. Finish React Project, Write Essay" required>
+                    <p class="mono text-muted" style="font-size: 0.7rem; margin-top: 5px;">The AI will align your activity with this goal.</p>
+                </div>
+
+                <div class="input-group">
+                    <label>Duration (Minutes)</label>
+                    <input type="number" id="duration" value="25" min="1" max="180">
+                </div>
+
+                <div class="input-group">
+                    <label>Mode</label>
+                    <select id="mode">
+                        <option value="deep">DEEP WORK (STRICT)</option>
+                        <option value="standard">STANDARD (LOOSE)</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label>Whitelist (Optional, Comma Separated)</label>
+                    <input type="text" id="whitelist" placeholder="e.g. stackoverflow, docs, localhost">
+                    <p class="mono text-muted" style="font-size: 0.7rem; margin-top: 5px;">If set, ONLY these are allowed.</p>
+                </div>
+
+                <div class="input-group">
+                    <label>Blacklist (Optional, Comma Separated)</label>
+                    <input type="text" id="blacklist" placeholder="e.g. twitter, youtube">
+                    <p class="mono text-muted" style="font-size: 0.7rem; margin-top: 5px;">Specific sites to block in addition to AI detection.</p>
+                </div>
+
+                <button type="submit" class="btn">INITIATE LOCK</button>
+            </form>
+        </div>
+
+        <div id="prediction-alert" class="hidden" style="margin-top: 1rem; border: 1px solid var(--danger); padding: 1rem;">
+            <strong class="text-danger">FAILURE PREDICTED</strong>
+            <p id="prediction-reason" class="mono" style="font-size: 0.8rem;"></p>
+        </div>
+
     </div>
 
-    <div class="input-group">
-        <label>Duration (Minutes)</label>
-        <input type="number" id="duration" value="25" min="1" max="120">
-    </div>
-    {% endif %}
-
-    {% if not status.active %}
-    <button class="btn-primary" onclick="startSession()">Initialize Lock</button>
-    {% endif %}
-    <div style="text-align: center; margin-top: 1rem;">
-        <a href="/analytics" style="color: var(--color-primary-dim); text-decoration: none; font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase;">View System Report</a>
-    </div>
-
-    <div class="system-status">
-        <span id="integrity-status" class="status-item">Checking Integrity...</span>
-        <span class="status-item">Local Storage: Active</span>
-    </div>
-
-    <script>
-        fetch('/api/integrity')
-            .then(r => r.json())
-            .then(data => {
-                const el = document.getElementById('integrity-status');
-                if (data.valid) {
-                    el.innerText = "✓ System Integrity Verified";
-                    el.style.color = "#00ff00";
-                } else {
-                    el.innerText = "⚠ " + data.message;
-                    el.style.color = "#ff0000";
-                }
-            });
-    </script>
-</div>
-{% endblock %}
+    <script src="{{ url_for('static', filename='js/client.js') }}"></script>
+</body>
+</html>

@@ -1,262 +1,172 @@
-/* =========================================================
-   FocusLock Client Controller
-   Role: UI + Signal Reporter
-   Authority: SERVER ONLY
-   ========================================================= */
+document.addEventListener('DOMContentLoaded', () => {
+    const startForm = document.getElementById('start-form');
+    const sessionSetupView = document.getElementById('session-setup-view');
+    const sessionActiveView = document.getElementById('session-active-view');
+    const timerDisplay = document.getElementById('timer-display');
+    const breakBtn = document.getElementById('break-btn');
+    const violationOverlay = document.getElementById('violation-overlay');
+    const themeToggle = document.getElementById('theme-toggle');
 
-// -------- UI TOGGLE --------
-function toggleDeepSettings() {
-    const mode = document.getElementById("mode").value;
-    const settings = document.getElementById("deep-settings");
-    if (settings) {
-        settings.style.display = mode === "deep" ? "block" : "none";
-    }
-}
+    // Theme Management
+    let currentTheme = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    themeToggle.textContent = `THEME: ${currentTheme.toUpperCase()}`;
 
-// -------- SESSION START --------
-function startSession() {
-    const durationInput = document.getElementById("duration");
-    const modeInput = document.getElementById("mode");
-    const keywordsInput = document.getElementById("allowed-keywords");
+    themeToggle.addEventListener('click', () => {
+        currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        localStorage.setItem('theme', currentTheme);
+        themeToggle.textContent = `THEME: ${currentTheme.toUpperCase()}`;
+    });
 
-    if (!durationInput || !modeInput) return;
+    // Start Session
+    if (startForm) {
+        startForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+        const duration = document.getElementById('duration').value;
+        const mode = document.getElementById('mode').value;
+        const whitelist = document.getElementById('whitelist').value;
+        const blacklist = document.getElementById('blacklist').value;
+        const intent = document.getElementById('user-intent').value;
 
-    const duration = durationInput.value;
-    const mode = modeInput.value;
-    const allowed_keywords = keywordsInput ? keywordsInput.value : "";
+        if (!intent) {
+            alert("Authority Requirement: You must declare an intent.");
+            return;
+        }
 
-    // Basic client validation (not authority)
-    if (duration < 1) {
-        alert("Invalid session duration.");
-        return;
-    }
+            try {
+                // Request Fullscreen for Deep Mode
+                if (mode === 'deep') {
+                    try {
+                        await document.documentElement.requestFullscreen();
+                    } catch (e) {
+                        console.log("Fullscreen denied", e);
+                    }
+                }
 
-    // Requests Fullscreen (Must be user initiated)
-    if (mode === "deep") {
-        document.documentElement.requestFullscreen().catch((e) => {
-            console.log("Fullscreen denied", e);
-        });
-    }
-
-    // Disable button to prevent double-start
-    const btn = document.querySelector(".btn-primary");
-    if (btn) {
-        btn.disabled = true;
-        btn.innerText = "SYSTEM INITIALIZING...";
-    }
-
-    fetch("/api/start", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ duration, mode, allowed_keywords })
-    })
-        .then(res => {
-            if (!res.ok) throw new Error("Start failed");
-            return res.json();
-        })
-        .then(() => {
-            // Hard navigation (prevents reload race condition)
-            window.location.href = "/";
-        })
-        .catch(err => {
-            console.error(err);
-            alert("System error. Check server.");
-            if (btn) {
-                btn.disabled = false;
-                btn.innerText = "Initialize Lock";
+                const res = await fetch('/api/start', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ 
+                        duration, 
+                        mode, 
+                        whitelist, 
+                        blacklist,
+                        intent
+                    })
+                });
+                const data = await res.json();
+                if (data.status === 'started') {
+                    updateUI(true);
+                }
+            } catch (err) {
+                console.error("Start failed", err);
             }
         });
-}
-
-// -------- SESSION BREAK --------
-function breakSession() {
-    window.location.href = "/excuse";
-}
-
-// -------- EXCUSE SUBMISSION --------
-function submitExcuse() {
-    const input = document.getElementById("excuse");
-    if (!input) return;
-
-    const excuse = input.value.trim();
-    if (excuse.length < 5) {
-        alert("Excuse must be explicit.");
-        return;
     }
 
-    fetch("/api/break", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ excuse })
-    })
-        .then(() => {
-            window.location.href = "/";
-        })
-        .catch(() => {
-            alert("Failed to submit excuse.");
-        });
-}
+    // Break Session
+    if (breakBtn) {
+        breakBtn.addEventListener('click', async () => {
+            const excuse = prompt("CRITICAL: Why are you breaking the contract?");
+            if (!excuse) return;
 
-// -------- ACTIVITY CHECK (SMART AI) --------
-let hiddenStart = 0;
-
-document.addEventListener("visibilitychange", () => {
-    // Only monitor visibility if we are in an active session
-    if (!window.initialStatus) return;
-
-    if (document.hidden) {
-        hiddenStart = Date.now();
-    } else {
-        if (hiddenStart === 0) return;
-        
-        const duration = (Date.now() - hiddenStart) / 1000;
-        hiddenStart = 0;
-
-        if (duration < 5) return; // Ignore brief flicks
-
-        // Demand explanation
-        const reason = prompt(
-            "⚠️ EXTERNAL ACTIVITY DETECTED ⚠️\n\n" +
-            "You were away for " + Math.floor(duration) + " seconds.\n" +
-            "State your purpose to the system:"
-        );
-
-        if (!reason || reason.trim() === "") {
-            // No answer = Admission of Guilt
-            fetch("/api/violation", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ type: "SILENT_DISTRACTION" })
-            });
-        } else {
-            // AI JUDGEMENT
-            fetch("/api/evaluate", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ reason })
-            })
-            .then(r => r.json())
-            .then(data => {
-                if (data.classification === "distraction") {
-                    alert("❌ SYSTEM RULING: DISTRACTION.\nPenalty Applied.");
-                } else {
-                    console.log("System ruling: Productive Context Switch");
-                }
-            });
-        }
-    }
-});
-
-// -------- HEARTBEAT (ANTI-TAMPER) --------
-setInterval(() => {
-    if (!window.initialStatus) return;
-    
-    fetch("/api/heartbeat", { method: "POST" })
-        .catch(() => {}); // silent
-}, 5000);
-
-// -------- SERVER-AUTH TIMER + PREDICTION --------
-if (window.initialStatus && document.getElementById("timer-display")) {
-    const display = document.getElementById("timer-display");
-    let lastPredictionHash = "";
-    
-    // AFK STATE
-    let afkTimer = null;
-    let isAfk = false;
-    const AFK_LIMIT = 30 * 60 * 1000; // 30 mins
-
-    function resetAfk() {
-        if (isAfk) {
-            // Resume
-            isAfk = false;
-            fetch('/api/afk', {
+            await fetch('/api/break', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({status: false})
+                body: JSON.stringify({ excuse })
             });
-            document.body.style.opacity = "1";
-        }
-        clearTimeout(afkTimer);
-        afkTimer = setTimeout(goAfk, AFK_LIMIT);
-    }
-    
-    function goAfk() {
-        isAfk = true;
-        fetch('/api/afk', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({status: true})
+            updateUI(false);
         });
-        
-        // Display Overlay
-        document.body.innerHTML = `
-            <div style="position:fixed; top:0; left:0; width:100%; height:100%; background:black; color:red; display:flex; justify-content:center; align-items:center; font-size:5rem; font-weight:bold; z-index:9999;">
-                GET FOCUS
-            </div>
-        `;
     }
 
-    // Monitor Activity
-    document.addEventListener('mousemove', resetAfk);
-    document.addEventListener('keydown', resetAfk);
-    resetAfk();
-
-    setInterval(() => {
-        fetch("/api/status")
-            .then(res => res.json())
-            .then(data => {
-                if (!data.active && !data.completed) {
-                    window.location.href = "/";
-                    return;
+    // Status Polling
+    async function checkStatus() {
+        try {
+            const res = await fetch('/api/status');
+            const status = await res.json();
+            
+            // Handle Violation Overlay
+            if (violationOverlay) {
+                if (status.is_distracted) {
+                    violationOverlay.classList.remove('hidden');
+                } else {
+                    violationOverlay.classList.add('hidden');
                 }
-                
-                if (data.completed) {
-                     alert("SESSION COMPLETE!");
-                     window.location.href = "/analytics";
-                     return;
-                }
+            }
 
-                // TIME DISPLAY
-                const minutes = Math.floor(data.remaining / 60)
-                    .toString()
-                    .padStart(2, "0");
-                const seconds = (data.remaining % 60)
-                    .toString()
-                    .padStart(2, "0");
+            // Update User Stats
+            if (status.user_stats) {
+                const levelEl = document.getElementById('user-level');
+                const xpEl = document.getElementById('user-xp');
+                if (levelEl) levelEl.textContent = status.user_stats.level;
+                if (xpEl) xpEl.textContent = status.user_stats.xp;
+            }
 
-                if (display) {
-                    display.innerText = `${minutes}:${seconds}`;
-                    if (data.paused) {
-                        display.innerText += " (PAUSED)";
-                        display.style.color = "yellow";
-                    } else {
-                        display.style.color = "";
-                    }
-                }
+            if (status.active) {
+                showActiveSession(status);
+            } else {
+                showSetup();
+            }
+        } catch (err) {
+            console.error("Status check failed", err);
+        }
+    }
 
-                // ---- DISTRACTION FLASH ----
-                if (data.distraction) {
-                    // Flash screen
-                    const originalBg = document.body.style.backgroundColor;
-                    document.body.style.backgroundColor = "red";
-                    alert(`⚠️ GET BACK TO WORK!\n\nDetected: ${data.distraction}`);
-                    document.body.style.backgroundColor = originalBg;
-                }
+    function showActiveSession(status) {
+        if (!sessionActiveView) return;
+        sessionSetupView.classList.add('hidden');
+        sessionActiveView.classList.remove('hidden');
 
-                // ---- FAILURE PREDICTION WARNING ----
-                if (data.prediction && data.prediction.warning) {
-                    const currentHash = data.prediction.reasons.join("|");
-                    if (currentHash !== lastPredictionHash) {
-                        alert(
-                            "⚠️ FOCUS FAILURE PREDICTED\n\n" +
-                            data.prediction.reasons.join("\n")
-                        );
-                        lastPredictionHash = currentHash;
-                    }
+        // Format Timer
+        const mins = Math.floor(status.remaining / 60).toString().padStart(2, '0');
+        const secs = (status.remaining % 60).toString().padStart(2, '0');
+        if (timerDisplay) {
+            timerDisplay.textContent = `${mins}:${secs}`;
+            
+            // Visual cues for paused state
+            if (status.paused) {
+                timerDisplay.style.opacity = "0.5";
+                if (!timerDisplay.textContent.includes("PAUSED")) {
+                   // Optional: Add indicator
                 }
-            })
-            .catch(() => {
-                // If server unreachable, do nothing
-            });
-    }, 1000);
-}
+            } else {
+                timerDisplay.style.opacity = "1";
+            }
+        }
+
+        const penaltiesEl = document.getElementById('session-penalties');
+        if (penaltiesEl) penaltiesEl.textContent = status.penalties;
+        
+        // Prediction Alert
+        const predAlert = document.getElementById('prediction-alert');
+        if (predAlert) {
+            if (status.prediction && status.prediction.warning) {
+                predAlert.classList.remove('hidden');
+                const reasonEl = document.getElementById('prediction-reason');
+                if (reasonEl) reasonEl.textContent = status.prediction.reasons.join(", ");
+            } else {
+                predAlert.classList.add('hidden');
+            }
+        }
+    }
+
+    function showSetup() {
+        if (!sessionSetupView) return;
+        sessionSetupView.classList.remove('hidden');
+        sessionActiveView.classList.add('hidden');
+        if (violationOverlay) violationOverlay.classList.add('hidden');
+    }
+
+    function updateUI(active) {
+        if (active) {
+            checkStatus();
+        } else {
+            showSetup();
+        }
+    }
+
+    // Init
+    setInterval(checkStatus, 1000);
+    checkStatus();
+});

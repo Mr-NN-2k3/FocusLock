@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, jsonify
-from app.core.engine import FocusEngine
+from backend.engine import FocusEngine
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder="templates", static_folder="static")
 engine = FocusEngine()
 
 
@@ -21,7 +21,7 @@ def excuse():
 
 @app.route("/analytics")
 def analytics():
-    from app.core.store import EventStore
+    from backend.store import EventStore
     store = EventStore()
     events = store.get_events()
 
@@ -42,10 +42,19 @@ def analytics():
 
 
 @app.route("/api/start", methods=["POST"])
+@app.route("/api/start", methods=["POST"])
 def api_start():
     data = request.json
-    keywords = data.get("allowed_keywords", "").split(",")
-    engine.start_session(data["duration"], data["mode"], allowed_keywords=keywords)
+    whitelist = data.get("whitelist", "").split(",") if data.get("whitelist") else []
+    blacklist = data.get("blacklist", "").split(",") if data.get("blacklist") else []
+    
+    engine.start_session(
+        data["duration"], 
+        data["mode"], 
+        whitelist=whitelist, 
+        blacklist=blacklist,
+        intent=data.get("intent", "")
+    )
     return jsonify({"status": "started"})
 
 
