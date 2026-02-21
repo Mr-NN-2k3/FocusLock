@@ -1,99 +1,180 @@
+
 import ctypes
 import threading
 import time
 import re
+import os
+import joblib
+import numpy as np
+from sentence_transformers import SentenceTransformer, util
 
-    # -------- INTENT ALIGNMENT ENGINE --------
+# -------- INTENT ALIGNMENT ENGINE (ML-POWERED) --------
 
 class IntentAlignmentEngine:
     def __init__(self, user_intent, whitelist=None, blacklist=None, mode="deep"):
-        self.user_intent = user_intent.lower() if user_intent else ""
+        self.user_intent = user_intent.lower() if user_intent else "general work and productivity"
         self.whitelist = whitelist or []
         self.blacklist = blacklist or []
         self.mode = mode
         
-        # Base Safe List (Context-Aware)
-        self.base_safe = [
-            "focuslock", "code", "project", "research", "docs", "documentation",
-            "python", "javascript", "html", "css", "java", "c++",
-            "github", "gitlab", "stackoverflow", "machine learning", "ai",
-            "model", "training", "dataset", "jupyter", "colab", "kaggle",
-            "visual studio", "vscode", "sublime", "atom", "jetbrains",
-            "pdf", "paper", "article", "university", "course", "lecture",
-            "gpt", "chatgpt", "claude", "gemini", "bard", "llm", "transformer"
-        ]
+        # Load ML Artifacts
+        self.model_path = os.path.join(os.path.dirname(__file__), "focus_model.pkl")
+        self.ml_ready = False
+        self.model = None
+        self.tfidf = None
+        self.embedder = None
+        
+        try:
+            if os.path.exists(self.model_path):
+                print(f"Loading ML Model from {self.model_path}...")
+                artifacts = joblib.load(self.model_path)
+                self.model = artifacts["model"]
+                self.tfidf = artifacts["tfidf"]
+                # SBERT is loaded separately as it's not pickled
+                self.embedder = SentenceTransformer('all-MiniLM-L6-v2')
+                self.ml_ready = True
+                print("ANTI-GRAVITY V2 ENGINE: ML Model Loaded Successfully")
+            else:
+                print("ANTI-GRAVITY V2 ENGINE: Model not found, using heuristics only.")
+        except Exception as e:
+            print(f"Failed to load ML model: {e}")
+            self.ml_ready = False
 
-        # Base Distraction List
-        self.base_distractions = [
-            "youtube", "netflix", "facebook", "twitter", "instagram", "tiktok",
-            "reddit", "pinterest", "twitch", "disney+", "hulu", "prime video",
-            "steam", "game", "playing", "watch", "movie", "tv show",
-            "whatsapp", "telegram", "discord", "messenger", "chat"
-        ]
+        # Fallback Heuristics (SHE)
+        self.concept_weights = {
+            "python": 25, "javascript": 25, "typescript": 25, "c++": 25, "java": 25, "rust": 25,
+            "go": 25, "html": 15, "css": 15, "sql": 20, "db": 15, "json": 10, "xml": 10,
+            "code": 20, "coding": 20, "frontend": 20, "backend": 20, "fullstack": 20,
+            "git": 15, "github": 15, "gitlab": 15, "merge": 10, "pull request": 15, "repo": 15,
+            "vs code": 30, "visual studio": 30, "pycharm": 30, "intellij": 30, "sublime": 20, "atom": 20,
+            "terminal": 15, "powershell": 15, "cmd": 15, "bash": 15, "zsh": 15, "debug": 25,
+            "documentation": 25, "docs": 20, "api": 15, "reference": 15, "manual": 15,
+            "tutorial": 15, "course": 20, "lecture": 20, "learn": 15, "study": 15, "university": 20,
+            "stackoverflow": 30, "stack exchange": 25, "geeksforgeeks": 15, "medium": 5,
+            "pdf": 10, "article": 5, "paper": 15, "arxiv": 20, "journal": 15,
+            "chatgpt": 20, "claude": 20, "gemini": 20, "bard": 10, "openai": 15, "llm": 20, "ai": 15,
+            "jira": 25, "trello": 20, "asana": 20, "notion": 20, "linear": 25,
+            "slack": 10, "teams": 10, "discord": -5,
+            "outlook": 15, "mail": 5, "calendar": 10, "meeting": 10, "zoom": 5,
+            "word": 10, "excel": 15, "powerpoint": 10, "spreadsheet": 15,
+            "youtube": -40, "netflix": -80, "twitch": -60, "hulu": -80, "disney+": -80, "prime video": -60,
+            "watch": -20, "movie": -50, "tv show": -50, "series": -50, "episode": -40, "streaming": -40,
+            "facebook": -60, "twitter": -50, "x": -40, "instagram": -70, "tiktok": -90, "reddit": -45,
+            "pinterest": -40, "linkedin": 10,
+            "whatsapp": -50, "telegram": -40, "messenger": -50, "chat": -20,
+            "steam": -70, "game": -60, "playing": -60, "play": -30, "gamer": -50,
+            
+            # COMEDY & ENTERTAINMENT (High Negative)
+            "comedy": -50, "standup": -50, "stand-up": -50, "joke": -40
+        }
 
     def evaluate(self, activity_title):
         """
         Returns: (classification, score, reason)
-        Score: 0-100 (High = Distraction)
         """
         title = activity_title.lower()
         
-        # 0. System Whitelist (Always Allowed)
+        # 0. System Authority (Always Productive)
         if "focuslock" in title:
             return "PRODUCTIVE", 0, "System Authority"
-            
-        # 1. Strict Whitelist Mode Override
+
+        # 1. Strict Whitelist (Highest Priority)
         if self.whitelist:
             for w in self.whitelist:
-                if w in title:
+                if w.lower() in title:
                     return "PRODUCTIVE", 0, "User Whitelist"
-            # In strict mode, if not whitelisted, it IS a distraction
             return "DISTRACTION", 100, "Not in Whitelist (Strict Mode)"
 
-        # 2. Blacklist Mode Override (Absolute Block)
+        # 2. Blacklist (Absolute Block)
         for b in self.blacklist:
-            if b in title:
-                return "DISTRACTION", 100, "User Blacklist"
+            if b.lower() in title:
+                return "DISTRACTION", 100, f"User Blacklist: {b}"
 
-        # 3. Analyze Key Components
+        # 3. ML PREDICTION (Anti-Gravity v2)
+        if self.ml_ready:
+            try:
+                # Prepare Features
+                # A. Embedding Similarity
+                g_emb = self.embedder.encode(self.user_intent, convert_to_tensor=True)
+                t_emb = self.embedder.encode(activity_title, convert_to_tensor=True) # use original casing for bert
+                
+                # Cosine Similarity
+                similarity = util.cos_sim(g_emb, t_emb).item()
+
+                # B. Mode Encoding
+                mode_val = 2 if self.mode == "deep" else 1
+
+                # C. TF-IDF
+                tfidf_vec = self.tfidf.transform([activity_title]).toarray()
+
+                # Assemble Vector
+                # [similarity, mode, ...tfidf...]
+                features = np.hstack(([[similarity, mode_val]], tfidf_vec))
+                
+                # Predict
+                prediction = self.model.predict(features)[0]
+                probs = self.model.predict_proba(features)[0]
+                classes = self.model.classes_
+
+                confidence = np.max(probs) * 100
+                
+                # If high confidence (>60%), trust the ML
+                if confidence > 60:
+                     score = 0
+                     if prediction == "DISTRACTION":
+                         score = int(confidence)
+                         return "DISTRACTION", score, f"AI Predicted Distraction ({int(confidence)}%)"
+                     elif prediction == "PRODUCTIVE":
+                         score = 100 - int(confidence)
+                         return "PRODUCTIVE", max(0, score), f"AI Predicted Productive ({int(confidence)}%)"
+                     else:
+                         return "NEUTRAL", 50, f"AI Predicted Neutral ({int(confidence)}%)"
+
+            except Exception as e:
+                print(f"ML Inference Error: {e}")
+                # Fallthrough to Heuristics
+
+        # 4. Fallback: Semantic Heuristic Engine (SHE)
+        return self._heuristic_evaluate(title)
+
+    def _heuristic_evaluate(self, title):
+        semantic_score = 0
+        reasons = []
+        
         intent_words = [w for w in self.user_intent.split() if len(w) > 3]
-        educational_keywords = ["tutorial", "course", "lecture", "learn", "study", "documentation", "how to", "guide"]
+        for word in intent_words:
+            if word in title:
+                semantic_score += 40
+                reasons.append(f"Intent Match ({word})")
+
+        found_concepts = []
+        for concept, weight in self.concept_weights.items():
+            if concept in title:
+                final_weight = weight
+                if weight > 0 and any(i in concept for i in intent_words):
+                    final_weight *= 2
+                semantic_score += final_weight
+                found_concepts.append(f"{concept}({final_weight})")
+
+        if not found_concepts and len(title) > 0:
+            if self.mode == "deep":
+                semantic_score -= 10
+                reasons.append("Unknown Context")
+            else:
+                semantic_score += 5
         
-        is_distraction_platform = any(d in title for d in self.base_distractions)
-        matches_intent = any(w in title for w in intent_words) if intent_words else False
-        is_educational = any(e in title for e in educational_keywords)
-        is_safe_context = any(s in title for s in self.base_safe)
-
-        # 4. Distraction Platform Logic (The Filter)
-        if is_distraction_platform:
-            # Platform is normally a distraction (e.g. YouTube, Netflix)
-            
-            # EXCEPTION A: Explicit Intent Match
-            # e.g. Intent="Watch Movie", Title="Netflix..." -> Matches "Movie"? Maybe not.
-            # e.g. Intent="Learn Python", Title="Python Tutorial - YouTube" -> Matches "Python"
-            if matches_intent and (is_educational or "watch" in self.user_intent):
-                 return "PRODUCTIVE", 20, "Distraction Platform allowed by specific Intent"
-            
-            # EXCEPTION B: General Educational Use
-            if is_educational:
-                return "NEUTRAL", 45, "Educational Content on Distraction Platform"
-
-            # No Exception -> BLOCK
-            return "DISTRACTION", 95, "Distraction Pattern Detected"
-
-        # 5. Safe Context / Intent Match (Non-Distraction Platforms)
-        if matches_intent:
-            return "PRODUCTIVE", 10, "Aligned with Intent"
-            
-        if is_safe_context:
-            return "PRODUCTIVE", 15, "Safe Productive Context"
-
-        # 6. Default / Unknown
-        # In Deep Mode, unknowns are suspicious but we shouldn't block blindly unless strict
-        if self.mode == "deep":
-            return "NEUTRAL", 55, "Unclassified Activity"
+        distraction_prob = 50 - (semantic_score / 1.5)
+        distraction_prob = max(0, min(100, distraction_prob))
         
-        return "PRODUCTIVE", 30, "Unclassified Activity (Standard)"
+        reason_str = ", ".join(reasons + found_concepts)
+        if not reason_str: reason_str = "Neutral Activity"
+
+        if distraction_prob > 60:
+            return "DISTRACTION", int(distraction_prob), f"High Distraction Score: {reason_str}"
+        elif distraction_prob < 40:
+            return "PRODUCTIVE", int(distraction_prob), f"High Focus Score: {reason_str}"
+        else:
+            return "NEUTRAL", int(distraction_prob), f"Ambiguous Activity: {reason_str}"
 
 
 class WindowMonitor:

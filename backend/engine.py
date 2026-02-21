@@ -19,8 +19,16 @@ class FocusEngine:
     # -------- SESSION --------
 
     def start_session(self, duration_minutes, mode="deep", whitelist=None, blacklist=None, intent=""):
-        if self.store.get_current_session():
-            raise Exception("Session already active")
+        # Auto-handle existing sessions by force-restarting
+        active_session = self.store.get_current_session()
+        if active_session:
+            self.store.append_event(
+                "SESSION_BROKEN",
+                {
+                    "session_id": active_session["session_id"],
+                    "excuse": "Force Restart"
+                }
+            )
 
         # Reset state
         self.is_paused = False
@@ -130,7 +138,15 @@ class FocusEngine:
                     
             return {
                 "active": False, 
-                "completed": True
+                "completed": True,
+                "summary": {
+                    "duration": session.get("expected_duration", 0),
+                    "violations": self.store.get_violation_count(session["session_id"]),
+                    "penalties": self.store.get_penalty_seconds(session["session_id"]),
+                    "mode": session.get("mode", "deep"),
+                    "intent": session.get("intent", "None")
+                },
+                "user_stats": self.store.get_user_stats()
             }
 
         remaining = int((adjusted_end - now).total_seconds())
@@ -217,20 +233,8 @@ class FocusEngine:
 
     # -------- MONITORING & AFK --------
 
-    def set_monitor(self, whitelist, blacklist):
-        from .monitor import WindowMonitor
-        
-        # Stop existing if any
-        if self.active_monitor:
-            self.active_monitor.stop()
-
-        self.active_monitor = WindowMonitor(
-            whitelist=whitelist,
-            blacklist=blacklist,
-            callback_violation=self._on_monitor_violation,
-            callback_safe=self._on_monitor_safe
-        )
-        self.active_monitor.start()
+    # This section contained a duplicate set_monitor method which has been removed.
+    # The correct set_monitor is defined above at line 50.
 
     def _on_monitor_violation(self, reason):
         # Callback: Distraction Active

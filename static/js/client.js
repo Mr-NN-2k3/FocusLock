@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const violationOverlay = document.getElementById('violation-overlay');
     const themeToggle = document.getElementById('theme-toggle');
 
-    // Theme Management
     let currentTheme = localStorage.getItem('theme') || 'dark';
     document.documentElement.setAttribute('data-theme', currentTheme);
     themeToggle.textContent = `THEME: ${currentTheme.toUpperCase()}`;
@@ -19,41 +18,59 @@ document.addEventListener('DOMContentLoaded', () => {
         themeToggle.textContent = `THEME: ${currentTheme.toUpperCase()}`;
     });
 
-    // Start Session
+    // -------- OPTIMIZED TIMER LOGIC --------
+    let localRemaining = 0;
+    let timerInterval = null;
+    let isTimerRunning = false;
+
+    function startLocalTimer() {
+        if (isTimerRunning) return;
+        isTimerRunning = true;
+        
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            if (localRemaining > 0) {
+                localRemaining--;
+                updateTimerDisplay(localRemaining);
+            } else {
+                // Time up - Force a status check to confirm completion
+                checkStatus(); 
+            }
+        }, 1000);
+    }
+
+    function stopLocalTimer() {
+        isTimerRunning = false;
+        if (timerInterval) clearInterval(timerInterval);
+    }
+
+    function updateTimerDisplay(seconds) {
+        if (!timerDisplay) return;
+        const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+        const secs = (seconds % 60).toString().padStart(2, '0');
+        timerDisplay.textContent = `${mins}:${secs}`;
+    }
+
+    // -------- API INTERACTIONS --------
+
     if (startForm) {
         startForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-        const duration = document.getElementById('duration').value;
-        const mode = document.getElementById('mode').value;
-        const whitelist = document.getElementById('whitelist').value;
-        const blacklist = document.getElementById('blacklist').value;
-        const intent = document.getElementById('user-intent').value;
-
-        if (!intent) {
-            alert("Authority Requirement: You must declare an intent.");
-            return;
-        }
+            const duration = document.getElementById('duration').value;
+            const mode = document.getElementById('mode').value;
+            const whitelist = document.getElementById('whitelist').value;
+            const blacklist = document.getElementById('blacklist').value;
 
             try {
-                // Request Fullscreen for Deep Mode
                 if (mode === 'deep') {
-                    try {
-                        await document.documentElement.requestFullscreen();
-                    } catch (e) {
-                        console.log("Fullscreen denied", e);
-                    }
+                    try { await document.documentElement.requestFullscreen(); } 
+                    catch (e) { console.log("Fullscreen denied", e); }
                 }
 
                 const res = await fetch('/api/start', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ 
-                        duration, 
-                        mode, 
-                        whitelist, 
-                        blacklist,
-                        intent
-                    })
+                    body: JSON.stringify({ duration, mode, whitelist, blacklist })
                 });
                 const data = await res.json();
                 if (data.status === 'started') {
@@ -65,7 +82,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Break Session
     if (breakBtn) {
         breakBtn.addEventListener('click', async () => {
             const excuse = prompt("CRITICAL: Why are you breaking the contract?");
@@ -80,7 +96,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Status Polling
     async function checkStatus() {
         try {
             const res = await fetch('/api/status');
@@ -104,8 +119,18 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (status.active) {
+                // SYNC LOCAL TIMER
+                // We rely on server truth for keeping it accurate
+                localRemaining = status.remaining;
+                startLocalTimer(); 
+                
                 showActiveSession(status);
             } else {
+                stopLocalTimer();
+                if (status.completed && status.summary) {
+                    const desc = `Congratulations on your focus of ${status.summary.duration} mins!\n\nDetailed Description:\nMode: ${status.summary.mode.toUpperCase()}\nGoal/Intent: ${status.summary.intent || 'None'}\nViolations Detected: ${status.summary.violations}\nPenalties Incurred: ${status.summary.penalties} seconds\n\nTotal XP Earned: ${status.user_stats.xp}`;
+                    alert(desc);
+                }
                 showSetup();
             }
         } catch (err) {
@@ -118,18 +143,13 @@ document.addEventListener('DOMContentLoaded', () => {
         sessionSetupView.classList.add('hidden');
         sessionActiveView.classList.remove('hidden');
 
-        // Format Timer
-        const mins = Math.floor(status.remaining / 60).toString().padStart(2, '0');
-        const secs = (status.remaining % 60).toString().padStart(2, '0');
+        // Initial Display Update
+        updateTimerDisplay(status.remaining);
+        
+        // Paused Visuals
         if (timerDisplay) {
-            timerDisplay.textContent = `${mins}:${secs}`;
-            
-            // Visual cues for paused state
             if (status.paused) {
                 timerDisplay.style.opacity = "0.5";
-                if (!timerDisplay.textContent.includes("PAUSED")) {
-                   // Optional: Add indicator
-                }
             } else {
                 timerDisplay.style.opacity = "1";
             }
@@ -166,7 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Init
-    setInterval(checkStatus, 1000);
+    // Init: Poll every 10 seconds instead of 1 second
+    setInterval(checkStatus, 10000);
     checkStatus();
 });

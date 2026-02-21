@@ -13,7 +13,7 @@ def index():
         return render_template("focus.html", status=status)
     return render_template("index.html", status=status)
 
-
+    
 @app.route("/excuse")
 def excuse():
     return render_template("excuse.html")
@@ -24,7 +24,7 @@ def analytics():
     from backend.store import EventStore
     store = EventStore()
     events = store.get_events()
-
+    
     total = sum(1 for e in events if e["type"] == "SESSION_START")
     broken = sum(1 for e in events if e["type"] == "SESSION_BROKEN")
     predicted = sum(1 for e in events if e["type"] == "FAILURE_PREDICTED")
@@ -105,4 +105,21 @@ def api_integrity():
 
 
 if __name__ == "__main__":
+    import os
+    import subprocess
+    import webbrowser
+    import time
+    from threading import Thread
+
+    if os.environ.get("WERKZEUG_RUN_MAIN") != "true":
+        print("Starting FocusLock... Training model first.")
+        subprocess.run(["python", "backend/train_model.py"], check=True)
+        print("Model trained. Starting Web Server...")
+
+        def open_browser():
+            time.sleep(1.5)
+            webbrowser.open("http://127.0.0.1:5000/")
+            
+        Thread(target=open_browser, daemon=True).start()
+
     app.run(debug=True)

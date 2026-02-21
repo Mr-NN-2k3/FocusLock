@@ -11,21 +11,20 @@ FocusLock treats focus as a **contract** — once started, it cannot be casually
 
 ---
 
-## 🆕 What's New (v1.1)
+## 🆕 What's New (v1.2)
+
+### 🏆 Gamified Authority
+Discipline is now quantifiable.
+- **XP & Levels**: Earn XP for flawless sessions. Lose XP for violations.
+- **High Stakes**: Breaking a session penalizes your level progress.
 
 ### 👁️ Intelligent Pattern Monitoring
-The system now watches *you*.
-- **Active Window Tracking**: FocusLock monitors your active applications. If you switch to an unauthorized window (e.g., social media, games), the system detects it immediately.
-- **Distraction Flashing**: The interface aggressively flashes red to snap you out of a distraction loop.
-
-### ⚖️ The AI Court
-Context switching is sometimes necessary, but never free.
-- **Justification Required**: If you leave the focus window, you must explain why.
-- **Automated Judgment**: The system evaluates your excuse. Valid research is allowed; vague excuses are penalized as violations.
+- **Active Window Tracking**: Real-time monitoring of foreground applications.
+- **Distraction Flashing**: Visual intervention (red overlay) when focus drifts.
 
 ### 🔀 Conditional Deep Work
-- **Standard Mode**: strict timing, but standard app permissions.
-- **Deep Mode**: Total lockdown. Fullscreen enforcement, strict window monitoring, and zero tolerance for unrelated activities.
+- **Standard Mode**: Timer only, loose enforcement.
+- **Deep Mode**: Total lockdown. Strict window monitoring and zero tolerance.
 
 ---
 
@@ -73,11 +72,15 @@ No silent edits. No state overwrites.
 - **Single Active Session Rule**  
   Only one focus contract may exist at a time.
 
-- **Glassmorphism System UI**  
+- **Neo-Blasphemy System UI**  
   High-contrast, distraction-free interface designed to induce flow.
 
 - **Analytics & Event Stream**  
   Visual audit of behavior and session outcomes.
+
+
+- **Gamification System**  
+  XP and Level tracking ensuring that consistency is rewarded and failure is expensive.
 
 - **Predictive Failure Detection**  
   Status checks analyze patterns (fatigue, violations) to warn of impending failure.
@@ -86,8 +89,9 @@ No silent edits. No state overwrites.
 
 ### 🧪 Future Experiments
 
-- **Social Focus Contracts** (Multiplayer accountability)
-- **Hardware Integration** (Locking specific apps/sites via OS APIs)
+- **Making it an app and extension of chrome for full system integration** 
+- **Hardware Integration**
+- **AI logic enhancement**
 
 ---
 
@@ -112,7 +116,7 @@ The backend is the **single source of truth** for:
 
 - HTML5 / CSS3  
 - Vanilla JavaScript  
-- Glassmorphism UI with strict visual hierarchy  
+- neo-blasphemy UI with strict visual hierarchy  
 
 The frontend:
 
@@ -214,7 +218,6 @@ http://localhost:5000
 * You cannot end a session silently.
 * All failures are logged permanently.
 * The system’s record is final.
-* **Debts must be paid.**
 
 Deleting the database is equivalent to **resetting your discipline history**.
 

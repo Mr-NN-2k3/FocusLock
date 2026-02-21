@@ -41,16 +41,15 @@ Sessions are authoritative, immutable, and auditable.
 
 ### Implemented
 - **Active Window Monitoring**: Hooks into OS APIs (`user32.dll`) to track foreground apps.
+- **Gamification System**: XP, Levels, and rewards for flawless sessions.
 - **Conditional Deep Work**: "Standard" (Timer only) vs "Deep" (Full Enforcement) modes.
-- **The AI Court (Alpha)**: Keyword-based evaluation of context switching excuses.
 - **Distraction Flashing**: Aggressive visual intervention on violation.
-- Context-aware attention enforcement (tab-level)
-- Progressive penalty system (cooldowns, time cost)
-- Failure pattern analytics dashboard
-- Tamper detection (offline gaps, suspicious exits)
+- **Context-aware attention enforcement**: Whitelist/Blacklist + Keyword heuristic.
+- **Progressive penalty system**: Cooldowns and focus debt.
+- **Failure pattern analytics**: Prediction of session failure based on fatigue and gaps.
 
 **Outcome:**  
-The system actively resists avoidance and self-negotiation.
+The system actively resists avoidance and leverages game theory for retention.
 
 ---
 
@@ -59,10 +58,15 @@ The system actively resists avoidance and self-negotiation.
 **Goal:** Anticipate failure and adapt enforcement preemptively.
 
 ### Implemented
-- Focus failure prediction (behavior-based)
+- Focus failure prediction (behavior-based heuristics)
 - Focus debt accumulation model
 - Local-first continuity with deferred sync
 - Cryptographic hashing of historical events
+
+### Planned
+- **Local LLM Integration**: Replace keyword matching with local LLM (Phi-2/Mistral) for true semantic understanding. 
+- **Adaptive Penalties**: Based on trust score.
+- **Smart Resumption**: Auto-continue if distraction was accidental/brief.
 
 **Outcome:**  
 FocusLock predicts and constrains failure before it occurs.
@@ -125,7 +129,6 @@ Replace state-overwrite persistence with an append-only event log (SQLite / JSON
 
 ## 🚧 Non-Goals
 - Motivational content
-- Gamification
 - Social comparison
 - “Gentle” productivity nudges
 
