@@ -50,22 +50,24 @@ class IntentAlignmentEngine:
             "terminal": 15, "powershell": 15, "cmd": 15, "bash": 15, "zsh": 15, "debug": 25,
             "documentation": 25, "docs": 20, "api": 15, "reference": 15, "manual": 15,
             "tutorial": 15, "course": 20, "lecture": 20, "learn": 15, "study": 15, "university": 20,
+            "leetcode": 30, "hackerrank": 30, "interview": 30, "glassdoor": 20, "system design": 25, "algorithm": 20,
             "stackoverflow": 30, "stack exchange": 25, "geeksforgeeks": 15, "medium": 5,
-            "pdf": 10, "article": 5, "paper": 15, "arxiv": 20, "journal": 15,
+            "pdf": 10, "article": 5, "paper": 15, "arxiv": 20, "journal": 15, "research": 20,
+            "writing": 15, "reading": 15, "book": 15, "deep work": 30,
             "chatgpt": 20, "claude": 20, "gemini": 20, "bard": 10, "openai": 15, "llm": 20, "ai": 15,
             "jira": 25, "trello": 20, "asana": 20, "notion": 20, "linear": 25,
             "slack": 10, "teams": 10, "discord": -5,
             "outlook": 15, "mail": 5, "calendar": 10, "meeting": 10, "zoom": 5,
             "word": 10, "excel": 15, "powerpoint": 10, "spreadsheet": 15,
-            "youtube": -40, "netflix": -80, "twitch": -60, "hulu": -80, "disney+": -80, "prime video": -60,
+            "youtube": -40, "netflix": -80, "twitch": -60, "hulu": -80, "disney+": -80, "prime video": -60, "video": -30,
             "watch": -20, "movie": -50, "tv show": -50, "series": -50, "episode": -40, "streaming": -40,
-            "facebook": -60, "twitter": -50, "x": -40, "instagram": -70, "tiktok": -90, "reddit": -45,
+            "facebook": -60, "twitter": -50, "x": -40, "instagram": -70, "tiktok": -90, "reddit": -45, "social": -40,
             "pinterest": -40, "linkedin": 10,
-            "whatsapp": -50, "telegram": -40, "messenger": -50, "chat": -20,
-            "steam": -70, "game": -60, "playing": -60, "play": -30, "gamer": -50,
-            
-            # COMEDY & ENTERTAINMENT (High Negative)
-            "comedy": -50, "standup": -50, "stand-up": -50, "joke": -40
+            "whatsapp": -50, "telegram": -40, "messenger": -50, "chat": -20, "messaging": -20,
+            "steam": -70, "game": -60, "playing": -60, "play": -30, "gamer": -50, "roblox": -60, "xbox": -60, "epic games": -60,
+            "amazon": -50, "ebay": -50, "walmart": -50, "shopping": -40, "buy": -30, "store": -20,
+            "news": -30, "cnn": -40, "bbc": -40, "fox news": -40, "buzzfeed": -50,
+            "comedy": -50, "standup": -50, "stand-up": -50, "joke": -40, "entertainment": -40
         }
 
     def evaluate(self, activity_title):
@@ -201,9 +203,8 @@ class WindowMonitor:
             return ""
 
     def _show_popup(self, title, reason):
-        def popup():
-            self.user32.MessageBoxW(0, f"DISTRACTION DETECTED:\n{title}\n\nREASON: {reason}\n\nGET BACK TO WORK.", "FOCUSLOCK AUTHORITY", 0x10 | 0x40000)
-        threading.Thread(target=popup, daemon=True).start()
+        # We disabled the native Windows alert popup because we are using the new Lightbox Modal System UI
+        pass
 
     def _monitor_loop(self):
         while self.running:

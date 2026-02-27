@@ -1,6 +1,4 @@
-
 # FocusLock
-
 **Authority over your own mind.**
 
 FocusLock is a **behavior enforcement system for deep work**.  
@@ -11,20 +9,21 @@ FocusLock treats focus as a **contract** — once started, it cannot be casually
 
 ---
 
-## 🆕 What's New (v1.2)
+## 🆕 What's New (v2.0 Redesign)
+
+### 🎨 Glassmorphism & UI Overhaul
+- **Premium Flutter Frontend**: A completely reimagined desktop application using Flutter, featuring frosted glass cards, blurred backgrounds, soft shadows, and dynamic gradient animations.
+- **Lightbox Warnings**: Native windows alerts are replaced with immersive, blurred Lightbox modals that freeze your session screen when a distraction is detected.
+- **Session Continuation**: Sessions no longer instantly end when time runs out. A modal allows you to "Continue" and increment your time and maintaining your focus streak!
+
+### 🧠 Expanded AI Classification System
+- **Context-Aware Intent**: Focus categories expanded to include `Studying`, `Coding`, `Interview Preparation`, `Research`, `Writing`, and more.
+- **Advanced Tolerance**: The heuristic engine intelligently forgives research concepts and platforms (like LeetCode, HackerRank, system design) while penalizing entertainment and shopping.
+- **Whitelist Customization**: Per-session keyword whitelists so you can declare exactly what strings dictate safe focus zones.
 
 ### 🏆 Gamified Authority
-Discipline is now quantifiable.
-- **XP & Levels**: Earn XP for flawless sessions. Lose XP for violations.
-- **High Stakes**: Breaking a session penalizes your level progress.
-
-### 👁️ Intelligent Pattern Monitoring
-- **Active Window Tracking**: Real-time monitoring of foreground applications.
-- **Distraction Flashing**: Visual intervention (red overlay) when focus drifts.
-
-### 🔀 Conditional Deep Work
-- **Standard Mode**: Timer only, loose enforcement.
-- **Deep Mode**: Total lockdown. Strict window monitoring and zero tolerance.
+- Discipline is now quantifiable via Multipliers & Streak tracking. 
+- Completing and extending sequential focus loops significantly boosts your XP yield.
 
 ---
 
@@ -36,7 +35,7 @@ User actions are *requests*, not commands.
 
 ### Time Is Sacred
 All timing is enforced **server-side**.  
-The client never decides time.
+The client never controls the actual time state.
 
 ### Failure Is Allowed, Denial Is Not
 Breaking focus requires an **explicit excuse**, permanently logged.
@@ -51,163 +50,109 @@ No silent edits. No state overwrites.
 
 ### ✅ Implemented (MVP Authority)
 
+- **AI Intent Alignment Engine**  
+  Monitors foreground windows and evaluates the contextual distance between the user's intent and their actual screen title using SentenceTransformers (`all-MiniLM-L6-v2`) and TF-IDF encodings.
+
 - **Server-Authoritative Focus Sessions**  
   Sessions are enforced by backend time, never client timers.
 
 - **Event-Sourced Architecture**  
-  All actions (`START`, `BROKEN`, `COMPLETE`) are stored as immutable events in SQLite.
+  All actions (`START`, `BROKEN`, `EXTEND`, `COMPLETE`) are stored as immutable events in SQLite.
 
 - **Cryptographic Event Chain**  
   Every event is hashed (SHA-256) and linked to the previous event. Any manual editing of the database breaks the chain and triggers a system alert.
 
 - **Focus Debt System**  
-  Time owes you. If you break a session, the remaining time is added to your "Focus Debt". It accumulates until paid.
-
-- **Forced Excuse Logging**  
-  You cannot end a session without admitting why you failed.
+  If you break a session, the remaining time is added to your "Focus Debt". It accumulates until paid.
 
 - **Offline-Resilient Architecture**  
-  Local-first design ensures functionality without internet, syncing state upon reconnection.
+  Local-first design ensures functionality without internet.
 
 - **Single Active Session Rule**  
   Only one focus contract may exist at a time.
-
-- **Neo-Blasphemy System UI**  
-  High-contrast, distraction-free interface designed to induce flow.
-
-- **Analytics & Event Stream**  
-  Visual audit of behavior and session outcomes.
-
-
-- **Gamification System**  
-  XP and Level tracking ensuring that consistency is rewarded and failure is expensive.
 
 - **Predictive Failure Detection**  
   Status checks analyze patterns (fatigue, violations) to warn of impending failure.
 
 ---
 
-### 🧪 Future Experiments
-
-- **Making it an app and extension of chrome for full system integration** 
-- **Hardware Integration**
-- **AI logic enhancement**
-
----
-
 ## 🏗 Architecture Overview
 
-### Backend — Authority Layer
-
-- Python 3  
-- Flask  
+### Backend — Authority & AI Layer
+- Python 3 & Flask
+- Scikit-learn (RandomForest) & SentenceTransformers for AI Window Tracking
 - SQLite (Append-Only Event Log + SHA-256 Chain)
 
 The backend is the **single source of truth** for:
+- Session state  
+- AI prediction & Heuristic evaluating
+- Time progression  
+- Behavioral history  
+- **Integrity verification**
 
-- session state  
-- time progression  
-- behavioral history  
-- **integrity verification**
-
----
-
-### Frontend — Execution Layer
-
-- HTML5 / CSS3  
-- Vanilla JavaScript  
-- neo-blasphemy UI with strict visual hierarchy  
+### Frontend — Execution & Rendering Layer
+- Flutter (Windows Desktop)
+- Riverpod (State Management)
+- Glassmorphism & Google Fonts
+- Local Polling via HTTP
 
 The frontend:
-
-- displays state  
-- reports user actions  
-- **never enforces rules**
-
----
-
-## 🧾 Event-Sourced Design
-
-FocusLock stores **no mutable session state**.
-
-Instead, it records events:
-
-- `SESSION_START`  
-- `SESSION_BREAK_ATTEMPT`  
-- `SESSION_BROKEN`  
-- `SESSION_COMPLETE`
-
-All current state is **derived by replaying events**.
-
-This enables:
-
-- behavioral analytics  
-- tamper detection (via Hash Chain)  
-- focus-debt calculation  
-- future AI prediction
+- Displays state beautifully
+- Animates visual consequences (Lightboxes)
+- Extends sessions via UX triggers
+- **Never enforces rules/time inherently**
 
 ---
 
 ## 📂 Project Structure
 
-```
-
+```text
 focuslock/
 │
-├── app/
-│   ├── core/
-│   │   ├── engine.py        # Focus logic & authority
-│   │   ├── store.py         # Event-sourced SQLite store + Crypto
-│   │   └── **init**.py
-│   │
-│   ├── templates/
-│   │   ├── base.html
-│   │   ├── index.html
-│   │   ├── focus.html
-│   │   ├── excuse.html
-│   │   └── analytics.html
-│   │
-│   ├── static/
-│   │   ├── css/
-│   │   │   └── main.css
-│   │   └── js/
-│   │       └── client.js
+├── backend/
+│   ├── engine.py        # Focus logic, extension overrides
+│   ├── monitor.py       # ML Pipeline, Sentence Embedder, Win32 Observer
+│   ├── store.py         # Event-sourced SQLite store + Crypto Hashing
+│   ├── train_model.py   # AI Pipeline Training Script
+│   └── dataset_generator.py
 │
-├── focuslock.db             # SQLite event log (auto-created)
-├── run.py                   # Application entry point
+├── focuslock_app/       # THE NEW FLUTTER FRONTEND
+│   ├── lib/
+│   │   ├── main.dart
+│   │   ├── providers.dart
+│   │   ├── ui_components.dart
+│   │   ├── api_service.dart
+│   │   ├── setup_session.dart
+│   │   └── active_session.dart
+│   └── pubspec.yaml
+│
+├── templates/           # Legacy Diagnostics/Analytics views
+├── focuslock.db         # SQLite event log (auto-created)
+├── run.py               # Application Entry (System API)
 └── README.md
-
-````
+```
 
 ---
 
 ## ▶️ Running FocusLock
 
 ### 1️⃣ Prerequisites
-
 - Python 3.9+  
-- pip  
+- Flutter SDK (with Desktop Windows support enabled)
 
-### 2️⃣ Install Dependencies
-
+### 2️⃣ Start the System API (Backend)
 ```bash
-pip install flask
-````
-
-(No heavy frameworks. No unnecessary dependencies.)
-
-### 3️⃣ Start the System
-
-```bash
+pip install flask sentence-transformers scikit-learn numpy ctypes joblib
 python run.py
 ```
+> The webserver runs natively on `http://127.0.0.1:5000` executing the API polling mechanism.
 
-### 4️⃣ Open the Interface
-
-Navigate to:
-
-```
-http://localhost:5000
+### 3️⃣ Start the Application (Frontend)
+In a secondary terminal window:
+```bash
+cd focuslock_app
+flutter pub get
+flutter run -d windows
 ```
 
 ---
@@ -223,43 +168,10 @@ Deleting the database is equivalent to **resetting your discipline history**.
 
 ---
 
-## 📊 Analytics
-
-Visit:
-
-```
-/analytics
-```
-
-View:
-
-* total sessions
-* failures
-* consistency rate
-* full event stream
-
-This is a **behavioral audit**, not motivation fluff.
-
----
-
 ## 🧑‍💻 Contributors
 
 * **Nitin**
 * **Nevil**
-
----
-
-## 📌 Positioning (For Evaluators & Recruiters)
-
-FocusLock demonstrates:
-
-* event-sourced backend design
-* authoritative state control
-* disciplined system architecture
-* psychological UX (Focus Debt, Prediction)
-* cryptographic data integrity
-
-Correctness, authority, and integrity are prioritized over convenience.
 
 ---
 
@@ -268,7 +180,6 @@ Correctness, authority, and integrity are prioritized over convenience.
 FocusLock is intentionally strict.
 
 If you are looking for:
-
 * gentle reminders
 * flexible timers
 * motivational quotes

@@ -57,6 +57,17 @@ def api_start():
     )
     return jsonify({"status": "started"})
 
+@app.route("/api/continue", methods=["POST"])
+def api_continue():
+    data = request.json
+    success = engine.extend_session(data.get("duration", 10))
+    return jsonify({"status": "extended" if success else "failed"})
+
+@app.route("/api/stop", methods=["POST"])
+def api_stop():
+    success = engine.stop_session()
+    return jsonify({"status": "stopped" if success else "failed"})
+
 
 @app.route("/api/afk", methods=["POST"])
 def api_afk():

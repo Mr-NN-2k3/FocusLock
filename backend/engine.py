@@ -144,10 +144,19 @@ class FocusEngine:
                     "violations": self.store.get_violation_count(session["session_id"]),
                     "penalties": self.store.get_penalty_seconds(session["session_id"]),
                     "mode": session.get("mode", "deep"),
-                    "intent": session.get("intent", "None")
+                    "intent": session.get("intent", "None"),
+                    "streak": session.get("streak", 1)
                 },
                 "user_stats": self.store.get_user_stats()
             }
+
+        if not self.active_monitor:
+            self.set_monitor(
+                whitelist=session.get("whitelist", []), 
+                blacklist=session.get("blacklist", []), 
+                intent=session.get("intent", ""), 
+                mode=session.get("mode", "deep")
+            )
 
         remaining = int((adjusted_end - now).total_seconds())
         if remaining < 0: remaining = 0
@@ -163,8 +172,29 @@ class FocusEngine:
             "prediction": prediction,
             "paused": self.is_paused,
             "is_distracted": self.is_distracted, # UI Overlay Trigger
+            "streak": session.get("streak", 1),
             "user_stats": self.store.get_user_stats()
         }
+
+    # -------- EXTEND / STOP --------
+
+    def extend_session(self, additional_minutes):
+        session = self.store.get_current_session()
+        if not session: return False
+        self.store.append_event(
+            "SESSION_EXTEND",
+            {"session_id": session["session_id"], "extension_minutes": int(additional_minutes)}
+        )
+        return True
+
+    def stop_session(self):
+        session = self.store.get_current_session()
+        if not session: return False
+        self.store.append_event("SESSION_STOP", {"session_id": session["session_id"]})
+        if self.active_monitor:
+            self.active_monitor.stop()
+            self.active_monitor = None
+        return True
 
     # -------- VIOLATIONS --------
 

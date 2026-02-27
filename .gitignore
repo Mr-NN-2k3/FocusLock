@@ -1,0 +1,15 @@
+venv
+__pycache__
+# add all the elements which are not suppose to be there on the github.
+```ignore
+.env
+.vscode/
+.idea/
+*.log
+dist/
+build/
+*.egg-info/
+.DS_Store
+```
+node_modules
+

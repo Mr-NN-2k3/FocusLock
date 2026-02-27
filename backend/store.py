@@ -112,18 +112,29 @@ class EventStore:
                 current = dict(e["payload"])
                 current["start_time"] = e["timestamp"]
 
-            elif e["type"] in ("SESSION_COMPLETE", "SESSION_BROKEN"):
+            elif e["type"] in ("SESSION_STOP", "SESSION_BROKEN"):
                 if current and e["payload"].get("session_id") == current.get("session_id"):
                     current = None
+            elif e["type"] == "SESSION_EXTEND":
+                if current and e["payload"].get("session_id") == current.get("session_id"):
+                    current["expected_duration"] += e["payload"].get("extension_minutes", 0)
+                    from datetime import timedelta
+                    end_time_dt = datetime.fromisoformat(current["expected_end_time"]) + timedelta(minutes=e["payload"].get("extension_minutes", 0))
+                    current["expected_end_time"] = end_time_dt.isoformat()
+                    current["streak"] = current.get("streak", 1) + 1
 
         return current
 
     def session_completed(self, session_id):
-        return any(
-            e["type"] == "SESSION_COMPLETE"
-            and e["payload"].get("session_id") == session_id
-            for e in self.get_events()
-        )
+        # Check if the latest completion happened after the latest extend
+        events = self.get_events()
+        last_comp = -1
+        last_ext = -1
+        for i, e in enumerate(events):
+            if e["payload"].get("session_id") == session_id:
+                if e["type"] == "SESSION_COMPLETE": last_comp = i
+                elif e["type"] == "SESSION_EXTEND": last_ext = i
+        return last_comp > last_ext
 
     # -------- PENALTIES & DEBT --------
 
