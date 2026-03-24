@@ -11,7 +11,7 @@ import 'api_service.dart';
 class ActiveSessionScreen extends ConsumerStatefulWidget {
   final bool isCompleted;
   
-  const ActiveSessionScreen({Key? key, required this.isCompleted}) : super(key: key);
+  const ActiveSessionScreen({super.key, required this.isCompleted});
 
   @override
   _ActiveSessionScreenState createState() => _ActiveSessionScreenState();
@@ -82,16 +82,16 @@ class _ActiveSessionScreenState extends ConsumerState<ActiveSessionScreen> with 
                         height: 280,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: const Color(0xFF6366F1).withOpacity(0.1 + (_pulseController.value * 0.1)),
+                          color: const Color(0xFF6366F1).withValues(alpha: 0.1 + (_pulseController.value * 0.1)),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF6366F1).withOpacity(0.2 * _pulseController.value),
+                              color: const Color(0xFF6366F1).withValues(alpha: 0.2 * _pulseController.value),
                               blurRadius: 50,
                               spreadRadius: 20,
                             ),
                           ],
                           border: Border.all(
-                            color: const Color(0xFF6366F1).withOpacity(0.5 + (_pulseController.value * 0.5)),
+                            color: const Color(0xFF6366F1).withValues(alpha: 0.5 + (_pulseController.value * 0.5)),
                             width: 2,
                           ),
                         ),
@@ -136,7 +136,7 @@ class _ActiveSessionScreenState extends ConsumerState<ActiveSessionScreen> with 
     return BackdropFilter(
       filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
       child: Container(
-        color: Colors.black.withOpacity(0.4),
+        color: Colors.black.withValues(alpha: 0.4),
         alignment: Alignment.center,
         child: AnimatedScale(
           scale: 1.0,
@@ -188,7 +188,7 @@ class _ActiveSessionScreenState extends ConsumerState<ActiveSessionScreen> with 
     return BackdropFilter(
       filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
       child: Container(
-        color: Colors.black.withOpacity(0.6),
+        color: Colors.black.withValues(alpha: 0.6),
         alignment: Alignment.center,
         child: AnimatedScale(
           scale: 1.0,

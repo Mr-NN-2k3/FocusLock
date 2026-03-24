@@ -77,7 +77,7 @@ class IntentAlignmentEngine:
         title = activity_title.lower()
         
         # 0. System Authority (Always Productive)
-        if "focuslock" in title:
+        if "focuslock" in title or "focus session" in title:
             return "PRODUCTIVE", 0, "System Authority"
 
         # 1. Strict Whitelist (Highest Priority)
@@ -180,8 +180,9 @@ class IntentAlignmentEngine:
 
 
 class WindowMonitor:
-    def __init__(self, intent=None, whitelist=None, blacklist=None, mode="deep", callback_violation=None, callback_safe=None):
+    def __init__(self, intent=None, whitelist=None, blacklist=None, mode="deep", callback_violation=None, callback_safe=None, engine_ref=None):
         self.engine = IntentAlignmentEngine(intent, whitelist, blacklist, mode)
+        self.engine_ref = engine_ref # reference to backend FocusEngine to read paused state
         self.callback_violation = callback_violation
         self.callback_safe = callback_safe
         self.running = False
@@ -214,10 +215,19 @@ class WindowMonitor:
                 time.sleep(1)
                 continue
             
+            if hasattr(self, "engine_ref") and getattr(self.engine_ref, "is_paused", False):
+                 continue
+
             # Use Intent Engine
             classification, score, reason = self.engine.evaluate(title)
             
+            
             # Threshold: > 60 is Distraction
+            # ONLY evaluate if it's currently an active, running session!
+            # If paused, we don't spam distraction alerts.
+            if hasattr(self.engine, "is_paused") and self.engine.is_paused:
+                 continue
+                 
             is_currently_distracted = score > 60
 
             if is_currently_distracted:

@@ -16,7 +16,7 @@ void main() {
 }
 
 class FocusLockApp extends ConsumerWidget {
-  const FocusLockApp({Key? key}) : super(key: key);
+  const FocusLockApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -48,7 +48,7 @@ class FocusLockApp extends ConsumerWidget {
 }
 
 class LandingPage extends StatelessWidget {
-  const LandingPage({Key? key}) : super(key: key);
+  const LandingPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +74,7 @@ class LandingPage extends StatelessWidget {
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF6366F1).withOpacity(0.5),
+                          color: const Color(0xFF6366F1).withValues(alpha: 0.5),
                           blurRadius: 30,
                           offset: const Offset(0, 10),
                         ),

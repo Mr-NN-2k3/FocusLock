@@ -12,9 +12,10 @@ FocusLock treats focus as a **contract** — once started, it cannot be casually
 ## 🆕 What's New (v2.0 Redesign)
 
 ### 🎨 Glassmorphism & UI Overhaul
-- **Premium Flutter Frontend**: A completely reimagined desktop application using Flutter, featuring frosted glass cards, blurred backgrounds, soft shadows, and dynamic gradient animations.
-- **Lightbox Warnings**: Native windows alerts are replaced with immersive, blurred Lightbox modals that freeze your session screen when a distraction is detected.
-- **Session Continuation**: Sessions no longer instantly end when time runs out. A modal allows you to "Continue" and increment your time and maintaining your focus streak!
+- **Dual Frontends**: A completely reimagined desktop application using Flutter, and a vastly upgraded web client.
+- **Glassmorphism Design System**: The harsh "Neon-Blastism" grids have been replaced with a premium, smooth Glassmorphism aesthetic featuring frosted glass cards, blurred backgrounds, soft shadows, and dynamic gradient animations across both web and desktop.
+- **Custom Modals (No More Alerts)**: Native browser static alerts (`alert()`, `prompt()`) are eradicated. Distractions, breaks, and session completion screens are now beautiful, custom-built Lightbox overlays that securely blur your background.
+- **Session Continuation**: Sessions no longer instantly end when time runs out. A completion modal allows you to gracefully "+10 MIN & STREAK" to increment your time while maintaining your focus loop!
 
 ### 🧠 Expanded AI Classification System
 - **Context-Aware Intent**: Focus categories expanded to include `Studying`, `Coding`, `Interview Preparation`, `Research`, `Writing`, and more.
@@ -24,6 +25,8 @@ FocusLock treats focus as a **contract** — once started, it cannot be casually
 ### 🏆 Gamified Authority
 - Discipline is now quantifiable via Multipliers & Streak tracking. 
 - Completing and extending sequential focus loops significantly boosts your XP yield.
+- **Accurate Progression Logging**: Time extensions (`SESSION_EXTEND`) are rigorously calculated into the total XP yield to ensure every minute focused is rewarded appropriately.
+- **Persistent Anti-Tamper Pauses**: Pause states (`SESSION_PAUSED`, `SESSION_RESUMED`) are now cryptographically written to the SQLite database. If the server crashes or restarts, your AFK penalty time is preserved.
 
 ---
 

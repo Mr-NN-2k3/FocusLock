@@ -9,7 +9,7 @@ class ApiService {
       final response = await http.get(Uri.parse('$baseUrl/status')).timeout(const Duration(seconds: 2));
       return jsonDecode(response.body);
     } catch (e) {
-      return {'active': false, 'error': e.toString()};
+      return {'error': e.toString()};
     }
   }
 

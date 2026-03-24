@@ -5,7 +5,7 @@ import 'ui_components.dart';
 import 'api_service.dart';
 
 class SetupSessionScreen extends StatefulWidget {
-  const SetupSessionScreen({Key? key}) : super(key: key);
+  const SetupSessionScreen({super.key});
 
   @override
   _SetupSessionScreenState createState() => _SetupSessionScreenState();
@@ -41,6 +41,7 @@ class _SetupSessionScreenState extends State<SetupSessionScreen> {
       blacklist: [],
     );
 
+    if (!mounted) return;
     Navigator.pop(context); // close dialog
 
     if (success) {
@@ -134,7 +135,7 @@ class _SetupSessionScreenState extends State<SetupSessionScreen> {
                       style: const TextStyle(color: Colors.white),
                       decoration: InputDecoration(
                         hintText: 'e.g., stackoverflow, docs, github',
-                        hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                        hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
                         border: InputBorder.none,
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       ),

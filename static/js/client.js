@@ -6,6 +6,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const breakBtn = document.getElementById('break-btn');
     const violationOverlay = document.getElementById('violation-overlay');
     const themeToggle = document.getElementById('theme-toggle');
+    
+    // Extracted Modals
+    const breakOverlay = document.getElementById('break-overlay');
+    const confirmBreakBtn = document.getElementById('btn-confirm-break');
+    const cancelBreakBtn = document.getElementById('btn-cancel-break');
+    const breakInput = document.getElementById('break-excuse-input');
+
+    const completionOverlay = document.getElementById('completion-overlay');
+    const completionDesc = document.getElementById('completion-desc');
+    const btnContinue = document.getElementById('btn-continue');
+    const btnStop = document.getElementById('btn-stop');
 
     let currentTheme = localStorage.getItem('theme') || 'dark';
     document.documentElement.setAttribute('data-theme', currentTheme);
@@ -83,16 +94,47 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (breakBtn) {
-        breakBtn.addEventListener('click', async () => {
-            const excuse = prompt("CRITICAL: Why are you breaking the contract?");
-            if (!excuse) return;
+        breakBtn.addEventListener('click', () => {
+            if (breakOverlay) breakOverlay.classList.remove('hidden');
+        });
+    }
 
+    if (cancelBreakBtn) {
+        cancelBreakBtn.addEventListener('click', () => {
+            if (breakOverlay) breakOverlay.classList.add('hidden');
+        });
+    }
+    
+    if (confirmBreakBtn) {
+        confirmBreakBtn.addEventListener('click', async () => {
+            const excuse = (breakInput && breakInput.value.trim()) ? breakInput.value.trim() : 'No reason';
+            if (breakOverlay) breakOverlay.classList.add('hidden');
             await fetch('/api/break', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ excuse })
             });
             updateUI(false);
+        });
+    }
+
+    if (btnContinue) {
+        btnContinue.addEventListener('click', async () => {
+             await fetch('/api/continue', {
+                 method: 'POST',
+                 headers: {'Content-Type': 'application/json'},
+                 body: JSON.stringify({ duration: 10 })
+             });
+             if (completionOverlay) completionOverlay.classList.add('hidden');
+             checkStatus();
+        });
+    }
+
+    if (btnStop) {
+        btnStop.addEventListener('click', async () => {
+             await fetch('/api/stop', { method: 'POST' });
+             if (completionOverlay) completionOverlay.classList.add('hidden');
+             showSetup();
         });
     }
 
@@ -128,10 +170,12 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 stopLocalTimer();
                 if (status.completed && status.summary) {
-                    const desc = `Congratulations on your focus of ${status.summary.duration} mins!\n\nDetailed Description:\nMode: ${status.summary.mode.toUpperCase()}\nGoal/Intent: ${status.summary.intent || 'None'}\nViolations Detected: ${status.summary.violations}\nPenalties Incurred: ${status.summary.penalties} seconds\n\nTotal XP Earned: ${status.user_stats.xp}`;
-                    alert(desc);
+                    const desc = `Duration: ${status.summary.duration} mins\nMode: ${status.summary.mode.toUpperCase()}\nGoal: ${status.summary.intent || 'None'}\nViolations: ${status.summary.violations}\nPenalties: ${status.summary.penalties} sec\nXP Earned: ${status.user_stats.xp}`;
+                    if (completionDesc) completionDesc.textContent = desc;
+                    if (completionOverlay) completionOverlay.classList.remove('hidden');
+                } else {
+                    showSetup();
                 }
-                showSetup();
             }
         } catch (err) {
             console.error("Status check failed", err);

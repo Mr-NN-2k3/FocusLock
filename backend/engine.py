@@ -68,7 +68,8 @@ class FocusEngine:
             blacklist=blacklist,
             mode=mode,
             callback_violation=self._on_monitor_violation,
-            callback_safe=self._on_monitor_safe
+            callback_safe=self._on_monitor_safe,
+            engine_ref=self
         )
         self.active_monitor.start()
     # -------- CLASSIFICATION --------
@@ -118,12 +119,12 @@ class FocusEngine:
         base_end = datetime.fromisoformat(session["expected_end_time"])
         penalty_seconds = self.store.get_penalty_seconds(session["session_id"])
         
-        # Extend end time by pause duration
+        total_paused_from_store = session.get("paused_duration", 0)
         current_pause_delta = 0
-        if self.is_paused:
+        if self.is_paused and self.pause_start_time:
             current_pause_delta = (now - self.pause_start_time).total_seconds()
             
-        total_extension = penalty_seconds + self.total_paused_duration + current_pause_delta
+        total_extension = penalty_seconds + total_paused_from_store + current_pause_delta
         adjusted_end = base_end + timedelta(seconds=total_extension)
 
         # --- AUTO COMPLETE ---
@@ -285,6 +286,10 @@ class FocusEngine:
         if self.is_paused: return
         self.is_paused = True
         self.pause_start_time = datetime.now()
+        session = self.store.get_current_session()
+        if session:
+            self.store.append_event("SESSION_PAUSED", {"session_id": session["session_id"]})
+        
         
     def resume_session(self):
         """Called when user returns"""
@@ -292,10 +297,12 @@ class FocusEngine:
         
         # Calculate how long we were paused and extend the end time
         duration = datetime.now() - self.pause_start_time
-        self.total_paused_duration += duration.total_seconds()
         
         self.is_paused = False
         self.pause_start_time = None
+        session = self.store.get_current_session()
+        if session:
+            self.store.append_event("SESSION_RESUMED", {"session_id": session["session_id"], "paused_seconds": duration.total_seconds()})
 
     # -------- FAILURE PREDICTION --------
 
@@ -306,8 +313,9 @@ class FocusEngine:
         now = datetime.now()
 
         # Adjust elapsed for pause
+        total_paused_from_store = session.get("paused_duration", 0)
         elapsed_real = (now - datetime.fromisoformat(session["start_time"])).total_seconds()
-        elapsed_active = elapsed_real - self.total_paused_duration
+        elapsed_active = elapsed_real - total_paused_from_store
 
         total = session["expected_duration"] * 60
         elapsed_ratio = elapsed_active / total if total > 0 else 0

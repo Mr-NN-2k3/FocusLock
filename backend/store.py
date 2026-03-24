@@ -111,6 +111,7 @@ class EventStore:
                     continue
                 current = dict(e["payload"])
                 current["start_time"] = e["timestamp"]
+                current["paused_duration"] = 0
 
             elif e["type"] in ("SESSION_STOP", "SESSION_BROKEN"):
                 if current and e["payload"].get("session_id") == current.get("session_id"):
@@ -122,6 +123,9 @@ class EventStore:
                     end_time_dt = datetime.fromisoformat(current["expected_end_time"]) + timedelta(minutes=e["payload"].get("extension_minutes", 0))
                     current["expected_end_time"] = end_time_dt.isoformat()
                     current["streak"] = current.get("streak", 1) + 1
+            elif e["type"] == "SESSION_RESUMED":
+                if current and e["payload"].get("session_id") == current.get("session_id"):
+                    current["paused_duration"] += e["payload"].get("paused_seconds", 0)
 
         return current
 
@@ -228,6 +232,10 @@ class EventStore:
                 if sid and sid in sessions:
                     sessions[sid]["completed"] = True
                     completed_sessions += 1
+
+            elif e["type"] == "SESSION_EXTEND":
+                if sid and sid in sessions:
+                    sessions[sid]["duration"] += payload.get("extension_minutes", 0)
 
             elif e["type"] == "SESSION_BROKEN":
                 if sid and sid in sessions:

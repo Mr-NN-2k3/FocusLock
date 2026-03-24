@@ -5,22 +5,22 @@ import 'package:google_fonts/google_fonts.dart';
 class GlassCard extends StatelessWidget {
   final Widget child;
   final double width;
-  final double height;
+  final double? height;
   final EdgeInsetsGeometry padding;
   
   const GlassCard({
-    Key? key,
+    super.key,
     required this.child,
     this.width = double.infinity,
-    this.height = double.infinity,
+    this.height,
     this.padding = const EdgeInsets.all(24.0),
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return GlassmorphicContainer(
       width: width,
-      height: height,
+      height: height ?? double.infinity,
       borderRadius: 24,
       blur: 20,
       alignment: Alignment.center,
@@ -29,8 +29,8 @@ class GlassCard extends StatelessWidget {
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: [
-          const Color(0xFFffffff).withOpacity(0.1),
-          const Color(0xFFFFFFFF).withOpacity(0.05),
+          const Color(0xFFffffff).withValues(alpha: 0.1),
+          const Color(0xFFFFFFFF).withValues(alpha: 0.05),
         ],
         stops: const [
           0.1,
@@ -41,8 +41,8 @@ class GlassCard extends StatelessWidget {
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: [
-          const Color(0xFFffffff).withOpacity(0.5),
-          const Color((0xFFFFFFFF)).withOpacity(0.1),
+          const Color(0xFFffffff).withValues(alpha: 0.5),
+          const Color((0xFFFFFFFF)).withValues(alpha: 0.1),
         ],
       ),
       child: Padding(
@@ -59,11 +59,11 @@ class PrimaryButton extends StatelessWidget {
   final bool isSecondary;
 
   const PrimaryButton({
-    Key? key,
+    super.key,
     required this.label,
     required this.onPressed,
     this.isSecondary = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -76,11 +76,11 @@ class PrimaryButton extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           gradient: isSecondary 
-            ? LinearGradient(colors: [Colors.white.withOpacity(0.1), Colors.white.withOpacity(0.1)])
+            ? LinearGradient(colors: [Colors.white.withValues(alpha: 0.1), Colors.white.withValues(alpha: 0.1)])
             : const LinearGradient(colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)]),
           boxShadow: isSecondary ? [] : [
             BoxShadow(
-              color: const Color(0xFF6366F1).withOpacity(0.5),
+              color: const Color(0xFF6366F1).withValues(alpha: 0.5),
               blurRadius: 15,
               offset: const Offset(0, 5),
             )
@@ -101,7 +101,7 @@ class PrimaryButton extends StatelessWidget {
 }
 
 class AnimatedBackground extends StatelessWidget {
-  const AnimatedBackground({Key? key}) : super(key: key);
+  const AnimatedBackground({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -123,10 +123,10 @@ class AnimatedBackground extends StatelessWidget {
               height: 400,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFF6366F1).withOpacity(0.15),
+                color: const Color(0xFF6366F1).withValues(alpha: 0.15),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF6366F1).withOpacity(0.2),
+                    color: const Color(0xFF6366F1).withValues(alpha: 0.2),
                     blurRadius: 100,
                     spreadRadius: 50,
                   ),
@@ -142,10 +142,10 @@ class AnimatedBackground extends StatelessWidget {
               height: 300,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFF8B5CF6).withOpacity(0.15),
+                color: const Color(0xFF8B5CF6).withValues(alpha: 0.15),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF8B5CF6).withOpacity(0.2),
+                    color: const Color(0xFF8B5CF6).withValues(alpha: 0.2),
                     blurRadius: 100,
                     spreadRadius: 50,
                   ),

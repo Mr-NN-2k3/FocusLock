@@ -2,28 +2,26 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'api_service.dart';
 
-final statusProvider = StateNotifierProvider<StatusNotifier, Map<String, dynamic>>((ref) {
-  final notifier = StatusNotifier();
-  return notifier;
-});
-
-class StatusNotifier extends StateNotifier<Map<String, dynamic>> {
+class StatusNotifier extends Notifier<Map<String, dynamic>> {
   Timer? _timer;
 
-  StatusNotifier() : super({'active': false}) {
+  @override
+  Map<String, dynamic> build() {
     _startPolling();
+    ref.onDispose(() {
+      _timer?.cancel();
+    });
+    return {'active': false};
   }
 
   void _startPolling() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) async {
       final status = await ApiService.getStatus();
-      state = status;
+      if (!status.containsKey('error')) {
+        state = status;
+      }
     });
   }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
 }
+
+final statusProvider = NotifierProvider<StatusNotifier, Map<String, dynamic>>(StatusNotifier.new);

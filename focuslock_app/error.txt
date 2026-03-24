@@ -1,0 +1,7 @@
+﻿Analyzing focuslock_app...                                      
+
+   info - Invalid use of a private type in a public API - lib\active_session.dart:17:3 - library_private_types_in_public_api
+   info - Invalid use of a private type in a public API - lib\setup_session.dart:11:3 - library_private_types_in_public_api
+  error - The argument type 'double?' can't be assigned to the parameter type 'double'.  - lib\ui_components.dart:23:15 - argument_type_not_assignable
+warning - Unused import: 'package:flutter/material.dart' - test\widget_test.dart:1:8 - unused_import
+

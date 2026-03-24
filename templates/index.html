@@ -9,16 +9,45 @@
 </head>
 <body>
 
-    <!-- Background Animation -->
-    <div class="bg-grid"></div>
+    <!-- Background Elements -->
+    <div style="position:fixed; top:-100px; left:-100px; width: 400px; height: 400px; border-radius: 50%; background: rgba(99, 102, 241, 0.15); filter: blur(80px); z-index: -1;"></div>
+    <div style="position:fixed; bottom:-50px; right:-100px; width: 300px; height: 300px; border-radius: 50%; background: rgba(139, 92, 246, 0.15); filter: blur(80px); z-index: -1;"></div>
 
     <!-- Theme Toggle -->
     <button id="theme-toggle" class="theme-toggle">THEME: DARK</button>
 
     <!-- Violation Overlay (Hidden by default) -->
-    <div id="violation-overlay" class="violation-overlay hidden">
-        <h1>DISTRACTION<br>DETECTED</h1>
-        <p class="mono">CLOSE UNAUTHORIZED WINDOW TO RESUME</p>
+    <div id="violation-overlay" class="violation-overlay hidden danger-flash">
+        <div class="glass-panel">
+            <h1 class="text-danger">Distraction Detected</h1>
+            <p style="font-size: 1.1rem; color: #eee; margin-bottom: 1rem;">Close unauthorized window to resume</p>
+            <p class="mono text-muted" style="font-size: 0.9rem;">FocusLock AI is monitoring your behavior.</p>
+        </div>
+    </div>
+
+    <!-- Completion Overlay (Hidden by default) -->
+    <div id="completion-overlay" class="violation-overlay hidden">
+        <div class="glass-panel">
+            <h1 style="color: var(--primary);">Session Complete 🎉</h1>
+            <p id="completion-desc" style="white-space: pre-wrap; font-size: 1.1rem; color: #eee; margin-bottom: 2rem;"></p>
+            <div style="display:flex; gap:1rem; justify-content:center;">
+                <button id="btn-continue" class="btn" style="flex: 1;">+10 MIN & STREAK</button>
+                <button id="btn-stop" class="btn" style="flex: 1; background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); box-shadow: none;">END SESSION</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Break Overlay (Hidden by default) -->
+    <div id="break-overlay" class="violation-overlay hidden">
+        <div class="glass-panel">
+            <h1 class="text-danger">Emergency Break</h1>
+            <p style="margin-bottom: 1rem;">Why are you breaking the contract?</p>
+            <input type="text" id="break-excuse-input" placeholder="Enter reason..." style="margin-bottom: 1.5rem;" autocomplete="off">
+            <div style="display:flex; gap:1rem; justify-content:center;">
+                <button id="btn-confirm-break" class="btn" style="flex: 1; background: var(--danger);">CONFIRM BREAK</button>
+                <button id="btn-cancel-break" class="btn" style="flex: 1; background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); box-shadow: none;">CANCEL</button>
+            </div>
+        </div>
     </div>
 
     <div class="neo-container">

@@ -1,0 +1,40 @@
+﻿Analyzing focuslock_app...                                      
+
+   info - Parameter 'key' could be a super parameter - lib\active_session.dart:14:9 - use_super_parameters
+   info - Invalid use of a private type in a public API - lib\active_session.dart:17:3 - library_private_types_in_public_api
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\active_session.dart:85:58 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\active_session.dart:88:62 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\active_session.dart:94:60 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\active_session.dart:139:29 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\active_session.dart:191:29 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\main.dart:19:9 - use_super_parameters
+   info - Parameter 'key' could be a super parameter - lib\main.dart:51:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\main.dart:77:58 - deprecated_member_use
+  error - The function 'StateNotifierProvider' isn't defined - lib\providers.dart:5:24 - undefined_function
+  error - Classes can only extend other classes - lib\providers.dart:10:30 - extends_non_class
+  error - Too many positional arguments: 0 expected, but 1 found - lib\providers.dart:13:28 - extra_positional_arguments
+  error - Undefined name 'state' - lib\providers.dart:20:7 - undefined_identifier
+warning - The method doesn't override an inherited method - lib\providers.dart:25:8 - override_on_non_overriding_member
+  error - The method 'dispose' isn't defined in a superclass of 'StatusNotifier' - lib\providers.dart:27:11 - undefined_super_member
+   info - Parameter 'key' could be a super parameter - lib\setup_session.dart:8:9 - use_super_parameters
+   info - Invalid use of a private type in a public API - lib\setup_session.dart:11:3 - library_private_types_in_public_api
+   info - Don't use 'BuildContext's across async gaps - lib\setup_session.dart:44:19 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\setup_session.dart:47:21 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\setup_session.dart:49:28 - use_build_context_synchronously
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\setup_session.dart:137:66 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\ui_components.dart:11:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\ui_components.dart:32:35 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\ui_components.dart:33:35 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\ui_components.dart:44:35 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\ui_components.dart:45:37 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\ui_components.dart:61:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\ui_components.dart:79:52 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\ui_components.dart:79:83 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\ui_components.dart:83:46 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\ui_components.dart:104:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\ui_components.dart:126:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\ui_components.dart:129:52 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\ui_components.dart:145:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\ui_components.dart:148:52 - deprecated_member_use
+  error - The name 'MyApp' isn't a class - test\widget_test.dart:16:35 - creation_with_non_type
+
