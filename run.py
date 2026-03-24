@@ -7,16 +7,7 @@ engine = FocusEngine()
 
 @app.route("/")
 def index():
-    status = engine.get_status()
-    # ONLY Deep Work (Strict) forces you into the lock screen
-    if status.get("active") and status.get("mode") == "deep":
-        return render_template("focus.html", status=status)
-    return render_template("index.html", status=status)
-
-    
-@app.route("/excuse")
-def excuse():
-    return render_template("excuse.html")
+    return render_template("index.html")
 
 
 @app.route("/analytics")
@@ -24,7 +15,7 @@ def analytics():
     from backend.store import EventStore
     store = EventStore()
     events = store.get_events()
-    
+
     total = sum(1 for e in events if e["type"] == "SESSION_START")
     broken = sum(1 for e in events if e["type"] == "SESSION_BROKEN")
     predicted = sum(1 for e in events if e["type"] == "FAILURE_PREDICTED")
@@ -42,26 +33,33 @@ def analytics():
 
 
 @app.route("/api/start", methods=["POST"])
-@app.route("/api/start", methods=["POST"])
 def api_start():
     data = request.json
-    whitelist = data.get("whitelist", "").split(",") if data.get("whitelist") else []
-    blacklist = data.get("blacklist", "").split(",") if data.get("blacklist") else []
     
+    # Handle whitelist/blacklist as either arrays or comma-separated strings
+    wl = data.get("whitelist", [])
+    bl = data.get("blacklist", [])
+    if isinstance(wl, str):
+        wl = [x.strip() for x in wl.split(",") if x.strip()]
+    if isinstance(bl, str):
+        bl = [x.strip() for x in bl.split(",") if x.strip()]
+
     engine.start_session(
-        data["duration"], 
-        data["mode"], 
-        whitelist=whitelist, 
-        blacklist=blacklist,
+        data["duration"],
+        data.get("mode", "deep"),
+        whitelist=wl,
+        blacklist=bl,
         intent=data.get("intent", "")
     )
     return jsonify({"status": "started"})
+
 
 @app.route("/api/continue", methods=["POST"])
 def api_continue():
     data = request.json
     success = engine.extend_session(data.get("duration", 10))
     return jsonify({"status": "extended" if success else "failed"})
+
 
 @app.route("/api/stop", methods=["POST"])
 def api_stop():
@@ -91,12 +89,6 @@ def api_violation():
     return jsonify({"status": "logged"})
 
 
-@app.route("/api/evaluate", methods=["POST"])
-def api_evaluate():
-    result = engine.classify_activity(request.json["reason"])
-    return jsonify({"classification": result})
-
-
 @app.route("/api/heartbeat", methods=["POST"])
 def api_heartbeat():
     engine.heartbeat()
@@ -105,7 +97,7 @@ def api_heartbeat():
 
 @app.route("/api/break", methods=["POST"])
 def api_break():
-    engine.break_session(request.json["excuse"])
+    engine.break_session(request.json.get("excuse", "No reason"))
     return jsonify({"status": "broken"})
 
 
@@ -113,6 +105,18 @@ def api_break():
 def api_integrity():
     valid, message = engine.store.verify_integrity()
     return jsonify({"valid": valid, "message": message})
+
+
+@app.route("/api/feedback", methods=["POST"])
+def api_feedback():
+    from backend.logger import logger
+    data = request.json
+    logger.log_user_feedback(
+        log_id=data.get("log_id", ""),
+        correct_label=data.get("label", ""),
+        comment=data.get("comment", "")
+    )
+    return jsonify({"status": "saved"})
 
 
 if __name__ == "__main__":
@@ -130,7 +134,7 @@ if __name__ == "__main__":
         def open_browser():
             time.sleep(1.5)
             webbrowser.open("http://127.0.0.1:5000/")
-            
+
         Thread(target=open_browser, daemon=True).start()
 
     app.run(debug=True)

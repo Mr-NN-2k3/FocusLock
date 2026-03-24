@@ -20,3 +20,121 @@ timestamp,title,app,url,goal,mode,similarity,heuristic,confidence,label
 2026-03-24T22:31:27.077773,"","explorer.exe","","learning python",deep,0.074,0,50.0,WARNING
 2026-03-24T22:31:27.123237,"FocusLock - Antigravity - README.md","Antigravity.exe","","learning python",deep,0.045,0,50.0,WARNING
 2026-03-24T22:31:28.106561,"FocusLock - Antigravity - README.md","Antigravity.exe","","learning python",deep,0.045,0,50.0,WARNING
+2026-03-24T22:31:55.153798,"Mr-NN-2k3/FocusLock - Google Chrome","chrome.exe","","learning python",deep,0.005,0,50.0,WARNING
+2026-03-24T22:31:55.173155,"Mr-NN-2k3/FocusLock - Google Chrome","chrome.exe","","learning python",deep,0.005,0,50.0,WARNING
+2026-03-24T22:31:59.183648,"FocusLock - Antigravity - README.md","Antigravity.exe","","learning python",deep,0.045,0,50.0,WARNING
+2026-03-24T22:31:59.209228,"FocusLock - Antigravity - README.md","Antigravity.exe","","learning python",deep,0.045,0,50.0,WARNING
+2026-03-24T22:32:07.228136,"FocusLock - Antigravity - README.md","Antigravity.exe","","learning python",deep,0,0,50.0,PRODUCTIVE
+2026-03-24T22:32:17.242487,"FocusLock - Antigravity - COMMIT_EDITMSG","Antigravity.exe","","learning python",deep,0,0,50.0,PRODUCTIVE
+2026-03-24T22:32:20.458160,"FocusLock - Antigravity - README.md","Antigravity.exe","","learning python",deep,0,0,50.0,PRODUCTIVE
+2026-03-24T22:32:23.157966,"FocusLock - Antigravity - README.md","Antigravity.exe","","learning python",deep,0,0,50.0,PRODUCTIVE
+2026-03-24T22:32:32.490103,"","explorer.exe","","learning python",deep,0.074,0,50.0,PRODUCTIVE
+2026-03-24T22:32:33.240583,"","OpenWith.exe","","learning python",deep,0,0,50.0,PRODUCTIVE
+2026-03-24T22:32:33.520808,"","OpenWith.exe","","learning python",deep,0.048,0,50.0,PRODUCTIVE
+2026-03-24T22:32:34.576179,"Untitled - Google Chrome","chrome.exe","","learning python",deep,0.043,0,50.0,WARNING
+2026-03-24T22:32:35.291797,"FocusLock - Google Chrome","chrome.exe","","learning python",deep,0,0,50.0,PRODUCTIVE
+2026-03-24T22:32:35.607984,"FocusLock - Google Chrome","chrome.exe","","learning python",deep,0,0,50.0,WARNING
+2026-03-24T22:32:41.321774,"FocusLock - Antigravity - README.md","Antigravity.exe","","learning python",deep,0.045,0,50.0,PRODUCTIVE
+2026-03-24T22:32:41.640131,"FocusLock - Antigravity - README.md","Antigravity.exe","","learning python",deep,0.045,0,50.0,WARNING
+2026-03-24T22:39:22.862293,"FocusLock - Antigravity - README.md","Antigravity.exe","","learning python",deep,0,0,50.0,PRODUCTIVE
+2026-03-24T22:39:38.867858,"FocusLock - Antigravity - README.md","Antigravity.exe","","learning python",deep,0,0,50.0,PRODUCTIVE
+2026-03-24T22:39:40.871846,"","OpenWith.exe","","learning python",deep,0,0,50.0,PRODUCTIVE
+2026-03-24T22:39:40.930106,"","OpenWith.exe","","learning python",deep,0.048,0,50.0,PRODUCTIVE
+2026-03-24T22:49:55.206496,"","Unknown","","learning python",deep,0.131,0,50.0,PRODUCTIVE
+2026-03-24T22:49:55.232615,"","Unknown","","learning python",deep,0.131,0,50.0,PRODUCTIVE
+2026-03-24T22:50:01.237125,"Windows Default Lock Screen","LockApp.exe","","learning python",deep,0,0,50.0,PRODUCTIVE
+2026-03-24T22:50:01.277130,"Windows Default Lock Screen","LockApp.exe","","learning python",deep,0,0,50.0,PRODUCTIVE
+2026-03-24T22:54:21.384146,"","Unknown","","learning python",deep,0.131,0,50.0,PRODUCTIVE
+2026-03-24T22:54:21.428700,"","Unknown","","learning python",deep,0.131,0,50.0,PRODUCTIVE
+2026-03-24T22:54:23.917750,"New Tab - Google Chrome","chrome.exe","","learning python",deep,0,0,50.0,PRODUCTIVE
+2026-03-24T22:54:23.947881,"New Tab - Google Chrome","chrome.exe","","learning python",deep,0,0,50.0,PRODUCTIVE
+2026-03-24T22:54:30.974388,"FocusLock - Antigravity - README.md","Antigravity.exe","","learning python",deep,0.045,0,50.0,PRODUCTIVE
+2026-03-24T22:54:31.033059,"FocusLock - Antigravity - README.md","Antigravity.exe","","learning python",deep,0.045,0,50.0,PRODUCTIVE
+2026-03-24T22:54:36.007663,"FocusLock | Cognitive Engine - Google Chrome","chrome.exe","","learning python",deep,0.033,0,50.0,PRODUCTIVE
+2026-03-24T22:54:36.071986,"FocusLock | Cognitive Engine - Google Chrome","chrome.exe","","learning python",deep,0.033,0,50.0,PRODUCTIVE
+2026-03-24T22:54:51.043171,"FocusLock - Antigravity - README.md","Antigravity.exe","","learning python",deep,0.045,0,50.0,PRODUCTIVE
+2026-03-24T22:54:51.120512,"FocusLock - Antigravity - README.md","Antigravity.exe","","learning python",deep,0.045,0,50.0,PRODUCTIVE
+2026-03-24T22:55:35.111505,"FocusLock | Cognitive Engine - Google Chrome","chrome.exe","","learning python",deep,0.033,0,50.0,PRODUCTIVE
+2026-03-24T22:55:35.196131,"FocusLock | Cognitive Engine - Google Chrome","chrome.exe","","learning python",deep,0.033,0,50.0,PRODUCTIVE
+2026-03-24T22:55:42.153490,"FocusLock - Antigravity - README.md","Antigravity.exe","","learning python",deep,0.045,0,50.0,PRODUCTIVE
+2026-03-24T22:55:42.249949,"FocusLock - Antigravity - README.md","Antigravity.exe","","learning python",deep,0.045,0,50.0,PRODUCTIVE
+2026-03-24T22:55:46.207285,"Manager","Antigravity.exe","","learning python",deep,0.038,0,50.0,PRODUCTIVE
+2026-03-24T22:55:46.339751,"Manager","Antigravity.exe","","learning python",deep,0.038,0,50.0,PRODUCTIVE
+2026-03-24T22:55:50.330424,"Antigravity","Antigravity.exe","","learning python",deep,0,0,50.0,PRODUCTIVE
+2026-03-24T22:55:50.675686,"Settings","Antigravity.exe","","learning python",deep,0,0,50.0,PRODUCTIVE
+2026-03-24T22:55:51.765718,"Settings","Antigravity.exe","","learning python",deep,0,0,50.0,PRODUCTIVE
+2026-03-24T22:56:04.926176,"FocusLock | Cognitive Engine - Google Chrome","chrome.exe","","learning python",deep,0,0,50.0,PRODUCTIVE
+2026-03-24T22:56:21.869902,"FocusLock | Cognitive Engine - Google Chrome","chrome.exe","","learning python",deep,0,0,50.0,PRODUCTIVE
+2026-03-24T22:56:26.879092,"ChatGPT - Google Chrome","chrome.exe","","learning python",deep,0,0,50.0,PRODUCTIVE
+2026-03-24T22:56:27.019633,"ChatGPT - Google Chrome","chrome.exe","","learning python",deep,0,0,50.0,PRODUCTIVE
+2026-03-24T22:56:27.880947,"FocusLock | Cognitive Engine - Google Chrome","chrome.exe","","learning python",deep,0,0,50.0,PRODUCTIVE
+2026-03-24T22:56:28.059234,"FocusLock | Cognitive Engine - Google Chrome","chrome.exe","","learning python",deep,0.033,0,50.0,PRODUCTIVE
+2026-03-24T22:56:28.884386,"(5) G-5. Breadth-First Search (BFS) | C++ and Java | Traversal Technique in Graphs - YouTube - Brave","brave.exe","","learning python",deep,0,10,60.0,PRODUCTIVE
+2026-03-24T22:56:29.097532,"(5) G-5. Breadth-First Search (BFS) | C++ and Java | Traversal Technique in Graphs - YouTube - Brave","brave.exe","","learning python",deep,0.167,10,60.0,PRODUCTIVE
+2026-03-24T22:56:29.887429,"FocusLock | Cognitive Engine - Google Chrome","chrome.exe","","learning python",deep,0,0,50.0,PRODUCTIVE
+2026-03-24T22:56:30.130217,"FocusLock | Cognitive Engine - Google Chrome","chrome.exe","","learning python",deep,0.033,0,50.0,PRODUCTIVE
+2026-03-24T22:56:32.893152,"New Tab - Google Chrome","chrome.exe","","learning python",deep,0,0,50.0,WARNING
+2026-03-24T22:56:33.164164,"New Tab - Google Chrome","chrome.exe","","learning python",deep,0.012,0,50.0,WARNING
+2026-03-24T22:56:35.193499,"Google Search - Google Chrome","chrome.exe","","learning python",deep,0.022,0,50.0,WARNING
+2026-03-24T22:56:35.943067,"youtube - Google Search - Google Chrome","chrome.exe","","learning python",deep,0.084,-10,90.0,WARNING
+2026-03-24T22:56:36.231272,"youtube - Google Search - Google Chrome","chrome.exe","","learning python",deep,0.084,-10,90.0,WARNING
+2026-03-24T22:56:36.984744,"FocusLock | Cognitive Engine - Google Chrome","chrome.exe","","learning python",deep,0.033,0,50.0,WARNING
+2026-03-24T22:56:37.271827,"FocusLock | Cognitive Engine - Google Chrome","chrome.exe","","learning python",deep,0.033,0,50.0,WARNING
+2026-03-24T22:56:41.307840,"youtube - Google Search - Google Chrome","chrome.exe","","learning python",deep,0.084,-10,90.0,WARNING
+2026-03-24T22:56:42.021365,"youtube - Google Search - Google Chrome","chrome.exe","","learning python",deep,0.084,-10,90.0,WARNING
+2026-03-24T22:56:43.344400,"YouTube - Google Chrome","chrome.exe","","learning python",deep,0.044,-10,90.0,WARNING
+2026-03-24T22:56:44.055831,"YouTube - Google Chrome","chrome.exe","","learning python",deep,0.044,-10,90.0,WARNING
+2026-03-24T22:56:45.393154,"FocusLock | Cognitive Engine - Google Chrome","chrome.exe","","learning python",deep,0.033,0,50.0,WARNING
+2026-03-24T22:56:46.104324,"FocusLock | Cognitive Engine - Google Chrome","chrome.exe","","learning python",deep,0.033,0,50.0,WARNING
+2026-03-24T22:56:50.426836,"YouTube - Google Chrome","chrome.exe","","learning python",deep,0.044,-10,90.0,WARNING
+2026-03-24T22:56:51.135161,"YouTube - Google Chrome","chrome.exe","","learning python",deep,0.044,-10,90.0,WARNING
+2026-03-24T22:57:00.211522,"FocusLock | Cognitive Engine - Google Chrome","chrome.exe","","learning python",deep,0.033,0,50.0,WARNING
+2026-03-24T22:57:00.464898,"FocusLock | Cognitive Engine - Google Chrome","chrome.exe","","learning python",deep,0.033,0,50.0,WARNING
+2026-03-24T22:57:01.266645,"comedy videos - YouTube - Google Chrome","chrome.exe","","learning python",deep,0.135,-20,95.0,DISTRACTION
+2026-03-24T22:57:01.504927,"comedy videos - YouTube - Google Chrome","chrome.exe","","learning python",deep,0.135,-20,95.0,DISTRACTION
+2026-03-24T22:57:04.301683,"FocusLock | Cognitive Engine - Google Chrome","chrome.exe","","learning python",deep,0.033,0,50.0,WARNING
+2026-03-24T22:57:04.548901,"FocusLock | Cognitive Engine - Google Chrome","chrome.exe","","learning python",deep,0.033,0,50.0,WARNING
+2026-03-24T22:57:15.344343,"comedy videos - YouTube - Google Chrome","chrome.exe","","learning python",deep,0.135,-20,95.0,DISTRACTION
+2026-03-24T22:57:15.589623,"comedy videos - YouTube - Google Chrome","chrome.exe","","learning python",deep,0.135,-20,95.0,DISTRACTION
+2026-03-24T22:57:16.621386,"FocusLock | Cognitive Engine - Google Chrome","chrome.exe","","learning python",deep,0.033,0,50.0,WARNING
+2026-03-24T22:57:17.376266,"FocusLock | Cognitive Engine - Google Chrome","chrome.exe","","learning python",deep,0.033,0,50.0,WARNING
+2026-03-24T22:57:24.426256,"FocusLock - Antigravity - README.md","Antigravity.exe","","learning python",deep,0.045,0,50.0,WARNING
+2026-03-24T22:57:24.665258,"FocusLock - Antigravity - README.md","Antigravity.exe","","learning python",deep,0.045,0,50.0,WARNING
+2026-03-24T22:57:26.458945,"","OpenWith.exe","","learning python",deep,0.048,0,50.0,WARNING
+2026-03-24T22:57:26.697537,"","OpenWith.exe","","learning python",deep,0.048,0,50.0,WARNING
+2026-03-24T22:57:30.524480,"FocusLock - Antigravity - README.md","Antigravity.exe","","learning python",deep,0.045,0,50.0,WARNING
+2026-03-24T22:57:30.738574,"Untitled - Google Chrome","chrome.exe","","learning python",deep,0.043,0,50.0,WARNING
+2026-03-24T22:57:31.559342,"FocusLock | Cognitive Engine - Google Chrome","chrome.exe","","learning python",deep,0.033,0,50.0,WARNING
+2026-03-24T22:57:31.779189,"FocusLock | Cognitive Engine - Google Chrome","chrome.exe","","learning python",deep,0.033,0,50.0,WARNING
+2026-03-24T22:57:37.605895,"FocusLock - Antigravity - README.md","Antigravity.exe","","learning python",deep,0.045,0,50.0,WARNING
+2026-03-24T22:57:37.808720,"FocusLock - Antigravity - README.md","Antigravity.exe","","learning python",deep,0.045,0,50.0,WARNING
+2026-03-24T22:57:41.639200,"FocusLock | Cognitive Engine - Google Chrome","chrome.exe","","learning python",deep,0.033,0,50.0,WARNING
+2026-03-24T22:57:41.837843,"FocusLock | Cognitive Engine - Google Chrome","chrome.exe","","learning python",deep,0.033,0,50.0,WARNING
+2026-03-24T22:57:48.667869,"FocusLock - Google Chrome","chrome.exe","","learning python",deep,0,0,50.0,WARNING
+2026-03-24T22:57:48.873394,"FocusLock - Google Chrome","chrome.exe","","learning python",deep,0,0,50.0,WARNING
+2026-03-24T22:57:49.919518,"FocusLock | Cognitive Engine - Google Chrome","chrome.exe","","learning python",deep,0.033,0,50.0,WARNING
+2026-03-24T22:57:50.697935,"FocusLock | Cognitive Engine - Google Chrome","chrome.exe","","learning python",deep,0.033,0,50.0,WARNING
+2026-03-24T22:57:53.730521,"Personal Projects - FocusLock AI Prompt Design - Google Chrome","chrome.exe","","learning python",deep,0.056,0,50.0,WARNING
+2026-03-24T22:57:53.949700,"Personal Projects - FocusLock AI Prompt Design - Google Chrome","chrome.exe","","learning python",deep,0.056,0,50.0,WARNING
+2026-03-24T22:57:54.766188,"FocusLock | Cognitive Engine - Google Chrome","chrome.exe","","learning python",deep,0.033,0,50.0,WARNING
+2026-03-24T22:57:54.987477,"FocusLock | Cognitive Engine - Google Chrome","chrome.exe","","learning python",deep,0.033,0,50.0,WARNING
+2026-03-24T22:57:55.805648,"Personal Projects - FocusLock AI Prompt Design - Google Chrome","chrome.exe","","learning python",deep,0.056,0,50.0,WARNING
+2026-03-24T22:57:56.022238,"Personal Projects - FocusLock AI Prompt Design - Google Chrome","chrome.exe","","learning python",deep,0.056,0,50.0,WARNING
+2026-03-24T22:57:59.846102,"FocusLock | Cognitive Engine - Google Chrome","chrome.exe","","learning python",deep,0.033,0,50.0,WARNING
+2026-03-24T22:58:00.053459,"FocusLock | Cognitive Engine - Google Chrome","chrome.exe","","learning python",deep,0.033,0,50.0,WARNING
+2026-03-24T22:58:05.090318,"Graph Representation in Java - Tutorial - Google Chrome","chrome.exe","","learning python",deep,0.103,10,60.0,WARNING
+2026-03-24T22:58:05.879389,"Graph Representation in Java - Tutorial - Google Chrome","chrome.exe","","learning python",deep,0.103,10,60.0,WARNING
+2026-03-24T22:58:06.909415,"FocusLock | Cognitive Engine - Google Chrome","chrome.exe","","learning python",deep,0.033,0,50.0,WARNING
+2026-03-24T22:58:07.122270,"FocusLock | Cognitive Engine - Google Chrome","chrome.exe","","learning python",deep,0.033,0,50.0,WARNING
+2026-03-24T22:58:09.153817,"Graph Representation in Java - Tutorial - Google Chrome","chrome.exe","","learning python",deep,0.103,10,60.0,WARNING
+2026-03-24T22:58:11.183091,"FocusLock - Antigravity - README.md","Antigravity.exe","","learning python",deep,0.045,0,50.0,WARNING
+2026-03-24T22:58:11.963047,"FocusLock - Antigravity - README.md","Antigravity.exe","","learning python",deep,0.045,0,50.0,WARNING
+2026-03-24T22:58:43.241866,"FocusLock - Antigravity - verify.py","Antigravity.exe","","learning python",deep,0.208,0,50.0,WARNING
+2026-03-24T22:58:44.017613,"FocusLock - Antigravity - verify.py","Antigravity.exe","","learning python",deep,0.208,0,50.0,WARNING
+2026-03-24T22:58:58.059137,"Graph Representation in Java - Tutorial - Google Chrome","chrome.exe","","learning python",deep,0.103,10,60.0,WARNING
+2026-03-24T22:58:58.296946,"Graph Representation in Java - Tutorial - Google Chrome","chrome.exe","","learning python",deep,0.103,10,60.0,WARNING
+2026-03-24T22:59:00.101321,"FocusLock | Cognitive Engine - Google Chrome","chrome.exe","","learning python",deep,0.033,0,50.0,WARNING
+2026-03-24T22:59:00.334695,"FocusLock | Cognitive Engine - Google Chrome","chrome.exe","","learning python",deep,0.033,0,50.0,WARNING
+2026-03-24T22:59:01.140258,"Mr-NN-2k3/FocusLock - Google Chrome","chrome.exe","","learning python",deep,0.005,0,50.0,WARNING
+2026-03-24T22:59:02.182723,"FocusLock - Antigravity - verify.py","Antigravity.exe","","learning python",deep,0.208,0,50.0,WARNING
+2026-03-24T22:59:02.382049,"FocusLock - Antigravity - verify.py","Antigravity.exe","","learning python",deep,0.208,0,50.0,WARNING

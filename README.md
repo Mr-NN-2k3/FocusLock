@@ -126,6 +126,9 @@ python run.py
 ```
 > The system will automatically execute the dataset generator (if missing) and open your default web browser to the Glassmorphism application located at `http://127.0.0.1:5000`.
 
+### 🖥 UI Troubleshooting
+If your browser displays the legacy `00:00` plain black screen, ensure you **hard-refresh your browser (Ctrl+Shift+R)** to clear the cache and load the new v3.0 Glassmorphism overlays.
+
 ---
 
 ## 🔐 System Rules (Non-Negotiable)

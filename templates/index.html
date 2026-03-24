@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FocusLock | Engine</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&family=Outfit:wght@600;800&display=swap" rel="stylesheet">
+    <title>FocusLock | Cognitive Engine</title>
+    <meta name="description" content="FocusLock - AI-driven Intent Alignment Engine for Deep Work">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&family=Outfit:wght@600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
 <body>
@@ -14,93 +15,150 @@
     <div class="orb orb-2"></div>
     <div class="orb orb-3"></div>
 
-    <button id="theme-toggle" class="theme-toggle">🌗</button>
+    <!-- Theme Toggle -->
+    <button id="theme-toggle" class="theme-toggle" title="Toggle Theme">🌗</button>
 
-    <!-- HARD DISTRACTION OVERLAY (Blocking) -->
+    <!-- ────────── HARD DISTRACTION OVERLAY ────────── -->
     <div id="violation-overlay" class="overlay hidden dist-flash">
-        <div class="glass-panel text-center">
-            <h1 class="text-danger">Distraction Blocked</h1>
-            <p class="text-muted" style="margin-bottom: 2rem;">Close unauthorized activity right now.</p>
-            <div id="distraction-reason" class="mono text-muted" style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px;">Waiting for telemetry...</div>
+        <div class="glass-panel overlay-panel">
+            <div class="text-center">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🚫</div>
+                <h1 class="text-danger" style="font-size: 2rem;">Distraction Blocked</h1>
+                <p class="text-muted" style="margin: 1rem 0 1.5rem;">Close the unauthorized window to resume your session.</p>
+                <div id="distraction-reason" class="mono reason-box">Analyzing...</div>
+            </div>
         </div>
     </div>
 
-    <!-- SOFT WARNING OVERLAY (Edge glowing) -->
+    <!-- ────────── SOFT WARNING OVERLAY ────────── -->
     <div id="warning-overlay" class="warning-edge hidden"></div>
     <div id="warning-toast" class="toast hidden">
-        <strong class="text-warning">⚠️ DRIFT / WARNING</strong>
-        <p id="warning-reason" class="mono text-muted" style="font-size: 0.8rem; margin-top: 5px;"></p>
+        <strong class="text-warning">⚠️ Drift Detected</strong>
+        <p id="warning-reason" class="mono text-muted" style="font-size: 0.8rem; margin-top: 4px;"></p>
     </div>
 
-    <!-- MAIN CONTAINER -->
+    <!-- ────────── COMPLETION OVERLAY ────────── -->
+    <div id="completion-overlay" class="overlay hidden">
+        <div class="glass-panel overlay-panel">
+            <div class="text-center">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🎉</div>
+                <h1 class="text-accent" style="font-size: 2rem;">Session Complete</h1>
+                <p id="completion-desc" class="text-muted" style="white-space: pre-wrap; margin: 1.5rem 0; font-size: 0.95rem; line-height: 1.6;"></p>
+                <div style="display: flex; gap: 1rem;">
+                    <button id="btn-continue" class="btn" style="flex: 1;">+10 MIN & STREAK</button>
+                    <button id="btn-stop" class="btn btn-outline" style="flex: 1;">END SESSION</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ────────── BREAK OVERLAY ────────── -->
+    <div id="break-overlay" class="overlay hidden">
+        <div class="glass-panel overlay-panel">
+            <div class="text-center">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">⚡</div>
+                <h1 class="text-danger" style="font-size: 2rem;">Emergency Break</h1>
+                <p class="text-muted" style="margin: 1rem 0;">Why are you breaking the contract?</p>
+                <input type="text" id="break-excuse-input" placeholder="Enter your reason..." autocomplete="off" style="margin-bottom: 1.5rem;">
+                <div style="display: flex; gap: 1rem;">
+                    <button id="btn-confirm-break" class="btn" style="flex: 1; background: var(--danger);">CONFIRM BREAK</button>
+                    <button id="btn-cancel-break" class="btn btn-outline" style="flex: 1;">CANCEL</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ────────── MAIN CONTAINER ────────── -->
     <div class="neo-container">
-        
+
+        <!-- Header -->
         <header class="text-center" style="margin-bottom: 2rem;">
             <h1>Focus<span class="text-accent">Lock</span></h1>
-            <div class="stats-row" style="margin-top: 1rem;">
+            <p class="mono text-muted" style="font-size: 0.8rem; margin-top: 0.3rem;">Cognitive Behavior Engine v3</p>
+            <div class="stats-row">
                 <span class="status-pill active">LVL <span id="user-level">1</span></span>
                 <span class="status-pill">XP <span id="user-xp">0</span></span>
-                <span class="status-pill danger">DEBT <span id="session-penalties">0</span>s</span>
             </div>
         </header>
 
-        <!-- SESSION SETUP VIEW -->
+        <!-- ═══════ SESSION SETUP VIEW ═══════ -->
         <div id="session-setup-view">
             <form id="start-form">
                 <div class="input-group">
-                    <label>Duration (Minutes)</label>
+                    <label for="intent">Goal / Intent</label>
+                    <textarea id="intent" rows="2" placeholder="e.g. Build authentication with React + Firebase"></textarea>
+                </div>
+                <div class="input-group">
+                    <label for="duration">Duration (minutes)</label>
                     <input type="number" id="duration" value="25" min="1" max="180">
                 </div>
-                <div class="input-group">
-                    <label>Goal / Intent (Be Specific)</label>
-                    <textarea id="intent" rows="2" placeholder="e.g. Build authentication using React and Firebase"></textarea>
+                <div class="two-col">
+                    <div class="input-group">
+                        <label for="mode">Mode</label>
+                        <select id="mode">
+                            <option value="deep">Deep Work (Strict)</option>
+                            <option value="standard">Standard (Lenient)</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="input-group">
-                    <label>Mode</label>
-                    <select id="mode">
-                        <option value="deep">Cognitive Deep (Strict NLP)</option>
-                        <option value="standard">Standard (Lenient)</option>
-                    </select>
+                    <label for="whitelist">Whitelist (optional, comma-separated)</label>
+                    <input type="text" id="whitelist" placeholder="e.g. stackoverflow, docs, localhost">
+                    <p class="mono text-muted hint">If set, ONLY these keywords are allowed.</p>
                 </div>
-                <button type="submit" class="btn">INITIALIZE ENGINE</button>
+                <div class="input-group">
+                    <label for="blacklist">Blacklist (optional, comma-separated)</label>
+                    <input type="text" id="blacklist" placeholder="e.g. twitter, youtube">
+                    <p class="mono text-muted hint">Explicitly blocked, in addition to AI detection.</p>
+                </div>
+                <button type="submit" class="btn" id="btn-start">INITIALIZE ENGINE</button>
             </form>
         </div>
 
-        <!-- ACTIVE SESSION VIEW -->
+        <!-- ═══════ ACTIVE SESSION VIEW ═══════ -->
         <div id="session-active-view" class="hidden">
-            
-            <!-- Focus Card -->
-            <div class="focus-card text-center" style="margin-bottom: 2rem;">
+
+            <!-- Timer Card -->
+            <div class="focus-card text-center">
                 <h2 id="timer-display" class="timer-text">00:00</h2>
-                <div class="mono text-muted">REMAINING</div>
-                <p style="margin-top: 1rem;"><span class="status-pill active" id="session-state-pill">PRODUCTIVE</span></p>
-                <div id="current-intent-display" class="intent-display"></div>
+                <p class="mono text-muted" style="margin-bottom: 0.8rem;">REMAINING</p>
+                <span class="status-pill active" id="session-state-pill">PRODUCTIVE</span>
+                <span class="status-pill danger" id="penalty-pill" style="margin-left: 0.5rem;">DEBT 0s</span>
             </div>
 
-            <!-- Activity Tracker -->
-            <div class="activity-tracker">
-                <label>Current Telemetry</label>
+            <!-- Intent Display -->
+            <div id="current-intent-display" class="intent-display hidden"></div>
+
+            <!-- Activity Telemetry -->
+            <div class="activity-tracker" style="margin-top: 1.5rem;">
+                <label>Live Telemetry</label>
                 <div class="telemetry-box">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                        <span class="mono text-accent" id="app-name">Unknown.exe</span>
-                        <span class="mono text-muted" id="latency-ms">0ms</span>
+                    <div class="telemetry-header">
+                        <span class="mono text-accent" id="app-name">—</span>
+                        <span class="mono text-muted" id="latency-ms">—</span>
                     </div>
-                    <div class="mono" id="window-title" style="font-size: 0.85rem; margin-bottom: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Waiting for window title...</div>
-                    
+                    <div class="mono" id="window-title" style="font-size: 0.8rem; margin-bottom: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-muted);">Waiting for telemetry...</div>
+
                     <div class="telemetry-bar-container" title="Confidence">
-                        <div class="telemetry-bar-fill conf-fill" id="conf-bar" style="width: 0%"></div>
+                        <div class="telemetry-bar-fill conf-fill" id="conf-bar" style="width: 0%;"></div>
                         <span class="bar-label">CONFIDENCE <span id="conf-text">0%</span></span>
                     </div>
-                    <div class="telemetry-bar-container" title="Semantic Match">
-                        <div class="telemetry-bar-fill sim-fill" id="sim-bar" style="width: 0%"></div>
-                        <span class="bar-label">SEMANTICS <span id="sim-text">0.0</span></span>
+                    <div class="telemetry-bar-container" title="Semantic Similarity">
+                        <div class="telemetry-bar-fill sim-fill" id="sim-bar" style="width: 0%;"></div>
+                        <span class="bar-label">SEMANTICS <span id="sim-text">0.00</span></span>
                     </div>
                 </div>
+            </div>
+
+            <!-- Prediction Alert -->
+            <div id="prediction-alert" class="prediction hidden">
+                <strong class="text-danger">⚠ FAILURE PREDICTED</strong>
+                <p id="prediction-reason" class="mono text-muted" style="font-size: 0.8rem; margin-top: 4px;"></p>
             </div>
 
             <button id="break-btn" class="btn btn-outline" style="margin-top: 1.5rem;">EMERGENCY BREAK</button>
         </div>
-        
+
     </div>
 
     <script src="{{ url_for('static', filename='js/client.js') }}"></script>
