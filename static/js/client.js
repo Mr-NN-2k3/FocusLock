@@ -1,236 +1,168 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Views and Forms
     const startForm = document.getElementById('start-form');
     const sessionSetupView = document.getElementById('session-setup-view');
     const sessionActiveView = document.getElementById('session-active-view');
-    const timerDisplay = document.getElementById('timer-display');
-    const breakBtn = document.getElementById('break-btn');
-    const violationOverlay = document.getElementById('violation-overlay');
-    const themeToggle = document.getElementById('theme-toggle');
     
-    // Extracted Modals
-    const breakOverlay = document.getElementById('break-overlay');
-    const confirmBreakBtn = document.getElementById('btn-confirm-break');
-    const cancelBreakBtn = document.getElementById('btn-cancel-break');
-    const breakInput = document.getElementById('break-excuse-input');
+    // Displays
+    const timerDisplay = document.getElementById('timer-display');
+    const statePill = document.getElementById('session-state-pill');
+    const intentDisplay = document.getElementById('current-intent-display');
+    
+    // Telemetry Elements
+    const elAppName = document.getElementById('app-name');
+    const elWindowTitle = document.getElementById('window-title');
+    const elLatency = document.getElementById('latency-ms');
+    const barConf = document.getElementById('conf-bar');
+    const textConf = document.getElementById('conf-text');
+    const barSim = document.getElementById('sim-bar');
+    const textSim = document.getElementById('sim-text');
 
-    const completionOverlay = document.getElementById('completion-overlay');
-    const completionDesc = document.getElementById('completion-desc');
-    const btnContinue = document.getElementById('btn-continue');
-    const btnStop = document.getElementById('btn-stop');
+    // Overlays
+    const violationOverlay = document.getElementById('violation-overlay');
+    const distReason = document.getElementById('distraction-reason');
+    const warningOverlay = document.getElementById('warning-edge');
+    const warningToast = document.getElementById('warning-toast');
+    const warningReason = document.getElementById('warning-reason');
+    const themeToggle = document.getElementById('theme-toggle');
 
     let currentTheme = localStorage.getItem('theme') || 'dark';
     document.documentElement.setAttribute('data-theme', currentTheme);
-    themeToggle.textContent = `THEME: ${currentTheme.toUpperCase()}`;
 
     themeToggle.addEventListener('click', () => {
         currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
         document.documentElement.setAttribute('data-theme', currentTheme);
         localStorage.setItem('theme', currentTheme);
-        themeToggle.textContent = `THEME: ${currentTheme.toUpperCase()}`;
     });
 
-    // -------- OPTIMIZED TIMER LOGIC --------
     let localRemaining = 0;
     let timerInterval = null;
-    let isTimerRunning = false;
 
     function startLocalTimer() {
-        if (isTimerRunning) return;
-        isTimerRunning = true;
-        
         if (timerInterval) clearInterval(timerInterval);
         timerInterval = setInterval(() => {
             if (localRemaining > 0) {
                 localRemaining--;
-                updateTimerDisplay(localRemaining);
+                let m = Math.floor(localRemaining / 60).toString().padStart(2, '0');
+                let s = (localRemaining % 60).toString().padStart(2, '0');
+                if (timerDisplay) timerDisplay.textContent = `${m}:${s}`;
             } else {
-                // Time up - Force a status check to confirm completion
-                checkStatus(); 
+                checkStatus();
             }
         }, 1000);
     }
-
-    function stopLocalTimer() {
-        isTimerRunning = false;
-        if (timerInterval) clearInterval(timerInterval);
-    }
-
-    function updateTimerDisplay(seconds) {
-        if (!timerDisplay) return;
-        const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
-        const secs = (seconds % 60).toString().padStart(2, '0');
-        timerDisplay.textContent = `${mins}:${secs}`;
-    }
-
-    // -------- API INTERACTIONS --------
 
     if (startForm) {
         startForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const duration = document.getElementById('duration').value;
             const mode = document.getElementById('mode').value;
-            const whitelist = document.getElementById('whitelist').value;
-            const blacklist = document.getElementById('blacklist').value;
-
+            const intent = document.getElementById('intent').value.trim();
+            
             try {
-                if (mode === 'deep') {
-                    try { await document.documentElement.requestFullscreen(); } 
-                    catch (e) { console.log("Fullscreen denied", e); }
-                }
-
                 const res = await fetch('/api/start', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ duration, mode, whitelist, blacklist })
+                    body: JSON.stringify({ duration, mode, intent, whitelist: [], blacklist: [] })
                 });
                 const data = await res.json();
                 if (data.status === 'started') {
-                    updateUI(true);
+                    checkStatus();
                 }
-            } catch (err) {
-                console.error("Start failed", err);
-            }
+            } catch (err) { console.error("Start failed", err); }
         });
     }
 
-    if (breakBtn) {
-        breakBtn.addEventListener('click', () => {
-            if (breakOverlay) breakOverlay.classList.remove('hidden');
-        });
-    }
-
-    if (cancelBreakBtn) {
-        cancelBreakBtn.addEventListener('click', () => {
-            if (breakOverlay) breakOverlay.classList.add('hidden');
-        });
-    }
-    
-    if (confirmBreakBtn) {
-        confirmBreakBtn.addEventListener('click', async () => {
-            const excuse = (breakInput && breakInput.value.trim()) ? breakInput.value.trim() : 'No reason';
-            if (breakOverlay) breakOverlay.classList.add('hidden');
-            await fetch('/api/break', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ excuse })
-            });
-            updateUI(false);
-        });
-    }
-
-    if (btnContinue) {
-        btnContinue.addEventListener('click', async () => {
-             await fetch('/api/continue', {
-                 method: 'POST',
-                 headers: {'Content-Type': 'application/json'},
-                 body: JSON.stringify({ duration: 10 })
-             });
-             if (completionOverlay) completionOverlay.classList.add('hidden');
-             checkStatus();
-        });
-    }
-
-    if (btnStop) {
-        btnStop.addEventListener('click', async () => {
-             await fetch('/api/stop', { method: 'POST' });
-             if (completionOverlay) completionOverlay.classList.add('hidden');
-             showSetup();
-        });
-    }
+    document.getElementById('break-btn')?.addEventListener('click', async () => {
+        await fetch('/api/break', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ excuse: 'Emergency Stop' }) });
+        checkStatus();
+    });
 
     async function checkStatus() {
         try {
             const res = await fetch('/api/status');
             const status = await res.json();
             
-            // Handle Violation Overlay
-            if (violationOverlay) {
-                if (status.is_distracted) {
-                    violationOverlay.classList.remove('hidden');
-                } else {
-                    violationOverlay.classList.add('hidden');
-                }
-            }
-
-            // Update User Stats
             if (status.user_stats) {
-                const levelEl = document.getElementById('user-level');
-                const xpEl = document.getElementById('user-xp');
-                if (levelEl) levelEl.textContent = status.user_stats.level;
-                if (xpEl) xpEl.textContent = status.user_stats.xp;
+                document.getElementById('user-level').textContent = status.user_stats.level;
+                document.getElementById('user-xp').textContent = status.user_stats.xp;
+                document.getElementById('session-penalties').textContent = status.penalties || 0;
             }
 
             if (status.active) {
-                // SYNC LOCAL TIMER
-                // We rely on server truth for keeping it accurate
-                localRemaining = status.remaining;
-                startLocalTimer(); 
+                sessionSetupView.classList.add('hidden');
+                sessionActiveView.classList.remove('hidden');
                 
-                showActiveSession(status);
+                localRemaining = status.remaining;
+                startLocalTimer();
+                
+                updateVisuals(status);
             } else {
-                stopLocalTimer();
-                if (status.completed && status.summary) {
-                    const desc = `Duration: ${status.summary.duration} mins\nMode: ${status.summary.mode.toUpperCase()}\nGoal: ${status.summary.intent || 'None'}\nViolations: ${status.summary.violations}\nPenalties: ${status.summary.penalties} sec\nXP Earned: ${status.user_stats.xp}`;
-                    if (completionDesc) completionDesc.textContent = desc;
-                    if (completionOverlay) completionOverlay.classList.remove('hidden');
-                } else {
-                    showSetup();
-                }
+                if (timerInterval) clearInterval(timerInterval);
+                sessionSetupView.classList.remove('hidden');
+                sessionActiveView.classList.add('hidden');
+                violationOverlay?.classList.add('hidden');
+                warningToast?.classList.add('hidden');
+                document.getElementById('warning-overlay')?.classList.add('hidden');
             }
         } catch (err) {
             console.error("Status check failed", err);
         }
     }
 
-    function showActiveSession(status) {
-        if (!sessionActiveView) return;
-        sessionSetupView.classList.add('hidden');
-        sessionActiveView.classList.remove('hidden');
-
-        // Initial Display Update
-        updateTimerDisplay(status.remaining);
+    function updateVisuals(status) {
+        // Handle explicit states
+        const state = status.current_state || "PRODUCTIVE"; // PRODUCTIVE, WARNING, DISTRACTION
         
-        // Paused Visuals
-        if (timerDisplay) {
-            if (status.paused) {
-                timerDisplay.style.opacity = "0.5";
-            } else {
-                timerDisplay.style.opacity = "1";
-            }
-        }
+        statePill.textContent = state;
+        statePill.className = "status-pill";
+        if (state === "PRODUCTIVE") statePill.classList.add("active");
+        else if (state === "WARNING") statePill.classList.add("warning");
+        else statePill.classList.add("danger");
 
-        const penaltiesEl = document.getElementById('session-penalties');
-        if (penaltiesEl) penaltiesEl.textContent = status.penalties;
-        
-        // Prediction Alert
-        const predAlert = document.getElementById('prediction-alert');
-        if (predAlert) {
-            if (status.prediction && status.prediction.warning) {
-                predAlert.classList.remove('hidden');
-                const reasonEl = document.getElementById('prediction-reason');
-                if (reasonEl) reasonEl.textContent = status.prediction.reasons.join(", ");
-            } else {
-                predAlert.classList.add('hidden');
-            }
-        }
-    }
-
-    function showSetup() {
-        if (!sessionSetupView) return;
-        sessionSetupView.classList.remove('hidden');
-        sessionActiveView.classList.add('hidden');
-        if (violationOverlay) violationOverlay.classList.add('hidden');
-    }
-
-    function updateUI(active) {
-        if (active) {
-            checkStatus();
+        // UI Overlays
+        const wOverlay = document.getElementById('warning-overlay');
+        if (state === "DISTRACTION") {
+            violationOverlay.classList.remove('hidden');
+            wOverlay?.classList.add('hidden');
+            warningToast.classList.add('hidden');
+            distReason.textContent = (status.activity_snapshot?.reason || "Behavior not aligned with intent.");
+        } else if (state === "WARNING") {
+            violationOverlay.classList.add('hidden');
+            wOverlay?.classList.remove('hidden');
+            warningToast.classList.remove('hidden');
+            warningReason.textContent = (status.activity_snapshot?.reason || "Drifting from goal...");
         } else {
-            showSetup();
+            violationOverlay.classList.add('hidden');
+            wOverlay?.classList.add('hidden');
+            warningToast.classList.add('hidden');
+        }
+
+        // Snapshot details
+        const snap = status.activity_snapshot;
+        if (snap) {
+            elAppName.textContent = snap.app || "Unknown.exe";
+            elWindowTitle.textContent = snap.title || "No Title";
+            
+            if (snap.features) {
+                elLatency.textContent = snap.features.latency_ms + "ms";
+                
+                const conf = snap.features.confidence || 0;
+                barConf.style.width = `${conf}%`;
+                textConf.textContent = `${conf}%`;
+
+                const sim = snap.features.semantic_similarity || 0;
+                barSim.style.width = `${Math.min(100, sim * 100)}%`;
+                textSim.textContent = `${sim.toFixed(2)}`;
+            }
+        }
+        
+        if (status.summary?.intent) {
+            intentDisplay.textContent = `🎯 Goal: ${status.summary.intent}`;
         }
     }
 
-    // Init: Poll every 10 seconds instead of 1 second
-    setInterval(checkStatus, 10000);
+    // Refresh telemetry
+    setInterval(checkStatus, 2000);
     checkStatus();
 });

@@ -1,0 +1,22 @@
+timestamp,title,app,url,goal,mode,similarity,heuristic,confidence,label
+2026-03-24T22:27:45.660375,"Test 0","chrome.exe","","learning python",deep,0,0,50.0,PRODUCTIVE
+2026-03-24T22:27:45.662385,"Test 1","chrome.exe","","learning python",deep,0,0,50.0,PRODUCTIVE
+2026-03-24T22:27:45.665153,"Test 2","chrome.exe","","learning python",deep,0,0,50.0,PRODUCTIVE
+2026-03-24T22:27:45.667671,"Test 3","chrome.exe","","learning python",deep,0,0,50.0,PRODUCTIVE
+2026-03-24T22:27:45.669807,"Test 4","chrome.exe","","learning python",deep,0,0,50.0,PRODUCTIVE
+2026-03-24T22:27:45.671818,"Test 5","chrome.exe","","learning python",deep,0,0,50.0,WARNING
+2026-03-24T22:30:28.589390,"FocusLock - Antigravity - README.md","Antigravity.exe","","learning python",deep,0,0,50.0,PRODUCTIVE
+2026-03-24T22:30:41.805019,"Project Llama Assistant Window","Grammarly.Desktop.exe","","learning python",deep,0,0,50.0,PRODUCTIVE
+2026-03-24T22:30:43.807355,"FocusLock - Antigravity - README.md","Antigravity.exe","","learning python",deep,0,0,50.0,PRODUCTIVE
+2026-03-24T22:30:53.921138,"FocusLock - Antigravity - README.md","Antigravity.exe","","learning python",deep,0,0,50.0,PRODUCTIVE
+2026-03-24T22:30:58.881664,"","OpenWith.exe","","learning python",deep,0.048,0,50.0,PRODUCTIVE
+2026-03-24T22:30:58.928059,"","OpenWith.exe","","learning python",deep,0,0,50.0,PRODUCTIVE
+2026-03-24T22:31:03.934156,"FocusLock - Antigravity - README.md","Antigravity.exe","","learning python",deep,0,0,50.0,PRODUCTIVE
+2026-03-24T22:31:03.943183,"FocusLock - Antigravity - README.md","Antigravity.exe","","learning python",deep,0.045,0,50.0,PRODUCTIVE
+2026-03-24T22:31:04.994484,"FocusLock - Google Chrome","chrome.exe","","learning python",deep,0,0,50.0,WARNING
+2026-03-24T22:31:05.026960,"FocusLock - Google Chrome","chrome.exe","","learning python",deep,0,0,50.0,PRODUCTIVE
+2026-03-24T22:31:24.036994,"Mr-NN-2k3/FocusLock - Google Chrome","chrome.exe","","learning python",deep,0.005,0,50.0,WARNING
+2026-03-24T22:31:24.075180,"Mr-NN-2k3/FocusLock - Google Chrome","chrome.exe","","learning python",deep,0.005,0,50.0,PRODUCTIVE
+2026-03-24T22:31:27.077773,"","explorer.exe","","learning python",deep,0.074,0,50.0,WARNING
+2026-03-24T22:31:27.123237,"FocusLock - Antigravity - README.md","Antigravity.exe","","learning python",deep,0.045,0,50.0,WARNING
+2026-03-24T22:31:28.106561,"FocusLock - Antigravity - README.md","Antigravity.exe","","learning python",deep,0.045,0,50.0,WARNING

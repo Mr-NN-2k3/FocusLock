@@ -3,117 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FocusLock | Authority</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@600;900&display=swap" rel="stylesheet">
+    <title>FocusLock | Engine</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&family=Outfit:wght@600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
 <body>
 
-    <!-- Background Elements -->
-    <div style="position:fixed; top:-100px; left:-100px; width: 400px; height: 400px; border-radius: 50%; background: rgba(99, 102, 241, 0.15); filter: blur(80px); z-index: -1;"></div>
-    <div style="position:fixed; bottom:-50px; right:-100px; width: 300px; height: 300px; border-radius: 50%; background: rgba(139, 92, 246, 0.15); filter: blur(80px); z-index: -1;"></div>
+    <!-- Dynamic Glass Orbs Background -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
 
-    <!-- Theme Toggle -->
-    <button id="theme-toggle" class="theme-toggle">THEME: DARK</button>
+    <button id="theme-toggle" class="theme-toggle">🌗</button>
 
-    <!-- Violation Overlay (Hidden by default) -->
-    <div id="violation-overlay" class="violation-overlay hidden danger-flash">
-        <div class="glass-panel">
-            <h1 class="text-danger">Distraction Detected</h1>
-            <p style="font-size: 1.1rem; color: #eee; margin-bottom: 1rem;">Close unauthorized window to resume</p>
-            <p class="mono text-muted" style="font-size: 0.9rem;">FocusLock AI is monitoring your behavior.</p>
+    <!-- HARD DISTRACTION OVERLAY (Blocking) -->
+    <div id="violation-overlay" class="overlay hidden dist-flash">
+        <div class="glass-panel text-center">
+            <h1 class="text-danger">Distraction Blocked</h1>
+            <p class="text-muted" style="margin-bottom: 2rem;">Close unauthorized activity right now.</p>
+            <div id="distraction-reason" class="mono text-muted" style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px;">Waiting for telemetry...</div>
         </div>
     </div>
 
-    <!-- Completion Overlay (Hidden by default) -->
-    <div id="completion-overlay" class="violation-overlay hidden">
-        <div class="glass-panel">
-            <h1 style="color: var(--primary);">Session Complete 🎉</h1>
-            <p id="completion-desc" style="white-space: pre-wrap; font-size: 1.1rem; color: #eee; margin-bottom: 2rem;"></p>
-            <div style="display:flex; gap:1rem; justify-content:center;">
-                <button id="btn-continue" class="btn" style="flex: 1;">+10 MIN & STREAK</button>
-                <button id="btn-stop" class="btn" style="flex: 1; background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); box-shadow: none;">END SESSION</button>
-            </div>
-        </div>
+    <!-- SOFT WARNING OVERLAY (Edge glowing) -->
+    <div id="warning-overlay" class="warning-edge hidden"></div>
+    <div id="warning-toast" class="toast hidden">
+        <strong class="text-warning">⚠️ DRIFT / WARNING</strong>
+        <p id="warning-reason" class="mono text-muted" style="font-size: 0.8rem; margin-top: 5px;"></p>
     </div>
 
-    <!-- Break Overlay (Hidden by default) -->
-    <div id="break-overlay" class="violation-overlay hidden">
-        <div class="glass-panel">
-            <h1 class="text-danger">Emergency Break</h1>
-            <p style="margin-bottom: 1rem;">Why are you breaking the contract?</p>
-            <input type="text" id="break-excuse-input" placeholder="Enter reason..." style="margin-bottom: 1.5rem;" autocomplete="off">
-            <div style="display:flex; gap:1rem; justify-content:center;">
-                <button id="btn-confirm-break" class="btn" style="flex: 1; background: var(--danger);">CONFIRM BREAK</button>
-                <button id="btn-cancel-break" class="btn" style="flex: 1; background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); box-shadow: none;">CANCEL</button>
-            </div>
-        </div>
-    </div>
-
+    <!-- MAIN CONTAINER -->
     <div class="neo-container">
-        <header style="text-align: center; margin-bottom: 2rem;">
+        
+        <header class="text-center" style="margin-bottom: 2rem;">
             <h1>Focus<span class="text-accent">Lock</span></h1>
-            <div style="display: flex; justify-content: center; gap: 1rem; margin-bottom: 0.5rem;">
-                <span class="status-pill active">LEVEL <span id="user-level">1</span></span>
-                <span class="status-pill">XP: <span id="user-xp">0</span></span>
+            <div class="stats-row" style="margin-top: 1rem;">
+                <span class="status-pill active">LVL <span id="user-level">1</span></span>
+                <span class="status-pill">XP <span id="user-xp">0</span></span>
+                <span class="status-pill danger">DEBT <span id="session-penalties">0</span>s</span>
             </div>
-            <p class="mono text-muted">SYSTEM AUTHORITY: <span id="system-status" class="text-accent">ONLINE</span></p>
         </header>
 
-        <!-- Active Session View -->
-        <div id="session-active-view" class="hidden">
-            <div style="text-align: center; margin-bottom: 2rem;">
-                <h2 id="timer-display" style="font-size: 4rem; font-family: var(--font-mono);">00:00</h2>
-                <p class="mono text-muted">REMAINING</p>
-            </div>
-
-            <div style="margin-bottom: 2rem;">
-                <p class="mono">STATUS: <span id="session-status-text" class="status-pill active">FOCUSED</span></p>
-                <p class="mono">PENALTIES: <span id="session-penalties" class="text-danger">0</span></p>
-            </div>
-
-            <button id="break-btn" class="btn" style="background: var(--danger);">EMERGENCY BREAK</button>
-        </div>
-
-        <!-- Setup View -->
+        <!-- SESSION SETUP VIEW -->
         <div id="session-setup-view">
             <form id="start-form">
-
-
                 <div class="input-group">
                     <label>Duration (Minutes)</label>
                     <input type="number" id="duration" value="25" min="1" max="180">
                 </div>
-
+                <div class="input-group">
+                    <label>Goal / Intent (Be Specific)</label>
+                    <textarea id="intent" rows="2" placeholder="e.g. Build authentication using React and Firebase"></textarea>
+                </div>
                 <div class="input-group">
                     <label>Mode</label>
                     <select id="mode">
-                        <option value="deep">DEEP WORK (STRICT)</option>
-                        <option value="standard">STANDARD (LOOSE)</option>
+                        <option value="deep">Cognitive Deep (Strict NLP)</option>
+                        <option value="standard">Standard (Lenient)</option>
                     </select>
                 </div>
-
-                <div class="input-group">
-                    <label>Whitelist (Optional, Comma Separated)</label>
-                    <input type="text" id="whitelist" placeholder="e.g. stackoverflow, docs, localhost">
-                    <p class="mono text-muted" style="font-size: 0.7rem; margin-top: 5px;">If set, ONLY these are allowed.</p>
-                </div>
-
-                <div class="input-group">
-                    <label>Blacklist (Optional, Comma Separated)</label>
-                    <input type="text" id="blacklist" placeholder="e.g. twitter, youtube">
-                    <p class="mono text-muted" style="font-size: 0.7rem; margin-top: 5px;">Specific sites to block in addition to AI detection.</p>
-                </div>
-
-                <button type="submit" class="btn">INITIATE LOCK</button>
+                <button type="submit" class="btn">INITIALIZE ENGINE</button>
             </form>
         </div>
 
-        <div id="prediction-alert" class="hidden" style="margin-top: 1rem; border: 1px solid var(--danger); padding: 1rem;">
-            <strong class="text-danger">FAILURE PREDICTED</strong>
-            <p id="prediction-reason" class="mono" style="font-size: 0.8rem;"></p>
-        </div>
+        <!-- ACTIVE SESSION VIEW -->
+        <div id="session-active-view" class="hidden">
+            
+            <!-- Focus Card -->
+            <div class="focus-card text-center" style="margin-bottom: 2rem;">
+                <h2 id="timer-display" class="timer-text">00:00</h2>
+                <div class="mono text-muted">REMAINING</div>
+                <p style="margin-top: 1rem;"><span class="status-pill active" id="session-state-pill">PRODUCTIVE</span></p>
+                <div id="current-intent-display" class="intent-display"></div>
+            </div>
 
+            <!-- Activity Tracker -->
+            <div class="activity-tracker">
+                <label>Current Telemetry</label>
+                <div class="telemetry-box">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span class="mono text-accent" id="app-name">Unknown.exe</span>
+                        <span class="mono text-muted" id="latency-ms">0ms</span>
+                    </div>
+                    <div class="mono" id="window-title" style="font-size: 0.85rem; margin-bottom: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Waiting for window title...</div>
+                    
+                    <div class="telemetry-bar-container" title="Confidence">
+                        <div class="telemetry-bar-fill conf-fill" id="conf-bar" style="width: 0%"></div>
+                        <span class="bar-label">CONFIDENCE <span id="conf-text">0%</span></span>
+                    </div>
+                    <div class="telemetry-bar-container" title="Semantic Match">
+                        <div class="telemetry-bar-fill sim-fill" id="sim-bar" style="width: 0%"></div>
+                        <span class="bar-label">SEMANTICS <span id="sim-text">0.0</span></span>
+                    </div>
+                </div>
+            </div>
+
+            <button id="break-btn" class="btn btn-outline" style="margin-top: 1.5rem;">EMERGENCY BREAK</button>
+        </div>
+        
     </div>
 
     <script src="{{ url_for('static', filename='js/client.js') }}"></script>

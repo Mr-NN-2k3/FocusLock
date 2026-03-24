@@ -9,101 +9,70 @@ FocusLock treats focus as a **contract** — once started, it cannot be casually
 
 ---
 
-## 🆕 What's New (v2.0 Redesign)
+## 🆕 What's New (v3.0 Cognitive Engine Redesign)
+
+### 🧠 True Cognitive Behavior Engine
+- **Decoupled Architecture**: Strict separation of concerns (Monitor -> Feature Classifier -> Decision Engine). The system now treats raw events, extracts semantic features, and processes state cleanly without logic cross-contamination.
+- **Hybrid AI Pipeline**: Fast heuristic passes mapped to a `<100ms` strict execution budget. If context is ambiguous, the system naturally falls back to `SentenceTransformers` embeddings.
+- **Drift Detection & Awareness**: The system now distinguishes between a 10-second necessary task switch and a scrolling binge. Frequent window switching triggers a gentle `WARNING` overlay before locking down.
 
 ### 🎨 Glassmorphism & UI Overhaul
-- **Dual Frontends**: A completely reimagined desktop application using Flutter, and a vastly upgraded web client.
-- **Glassmorphism Design System**: The harsh "Neon-Blastism" grids have been replaced with a premium, smooth Glassmorphism aesthetic featuring frosted glass cards, blurred backgrounds, soft shadows, and dynamic gradient animations across both web and desktop.
-- **Custom Modals (No More Alerts)**: Native browser static alerts (`alert()`, `prompt()`) are eradicated. Distractions, breaks, and session completion screens are now beautiful, custom-built Lightbox overlays that securely blur your background.
-- **Session Continuation**: Sessions no longer instantly end when time runs out. A completion modal allows you to gracefully "+10 MIN & STREAK" to increment your time while maintaining your focus loop!
-
-### 🧠 Expanded AI Classification System
-- **Context-Aware Intent**: Focus categories expanded to include `Studying`, `Coding`, `Interview Preparation`, `Research`, `Writing`, and more.
-- **Advanced Tolerance**: The heuristic engine intelligently forgives research concepts and platforms (like LeetCode, HackerRank, system design) while penalizing entertainment and shopping.
-- **Whitelist Customization**: Per-session keyword whitelists so you can declare exactly what strings dictate safe focus zones.
+- **Premium Glassmorphism Design System**: Frosted glass panels, dynamic floating ambient orbs, and layered visual depth.
+- **Activity Tracker & Confidence Gauges**: Real-time telemetry exposes exactly what the AI engine thinks of your active window, including Semantic Match and Confidence scores.
+- **Custom Modals (No More OS Alerts)**: Distractions and warning drifts are handled by beautifully animated, non-intrusive edge glows or in-app modals.
 
 ### 🏆 Gamified Authority
-- Discipline is now quantifiable via Multipliers & Streak tracking. 
-- Completing and extending sequential focus loops significantly boosts your XP yield.
-- **Accurate Progression Logging**: Time extensions (`SESSION_EXTEND`) are rigorously calculated into the total XP yield to ensure every minute focused is rewarded appropriately.
-- **Persistent Anti-Tamper Pauses**: Pause states (`SESSION_PAUSED`, `SESSION_RESUMED`) are now cryptographically written to the SQLite database. If the server crashes or restarts, your AFK penalty time is preserved.
+- **Offline-Resilient Event Sourcing**: Every state transition (Pause, Extend, Complete) is cryptographically locked in a SQLite chain.
+- **Accurate Progression Logging**: Time extensions (`SESSION_EXTEND`) correctly yield XP scaling.
 
 ---
 
 ## 🧠 Core Philosophy
 
 ### System > User
-The system is the authority.  
-User actions are *requests*, not commands.
+The system is the authority. User actions are *requests*, not commands.
 
 ### Time Is Sacred
-All timing is enforced **server-side**.  
-The client never controls the actual time state.
-
-### Failure Is Allowed, Denial Is Not
-Breaking focus requires an **explicit excuse**, permanently logged.
+All timing is enforced **server-side**. The client never controls the actual time state.
 
 ### History Is Truth
-All behavior is recorded as **append-only events**.  
-No silent edits. No state overwrites.
+All behavior is recorded as **append-only events**. No silent edits. No state overwrites.
 
 ---
 
 ## 🚀 Features
 
-### ✅ Implemented (MVP Authority)
-
-- **AI Intent Alignment Engine**  
-  Monitors foreground windows and evaluates the contextual distance between the user's intent and their actual screen title using SentenceTransformers (`all-MiniLM-L6-v2`) and TF-IDF encodings.
-
+- **Event-Driven AI Alignment Engine**  
+  Monitors foreground windows and evaluates the contextual distance between the user's intended goal and their actual screen utilizing a hybrid heuristic-ML pipeline.
+- **Drift Detection & Cooldown Interventions**  
+  Provides soft intervention warnings (`WARNING` state) to snap the user back prior to registering definitive Focus Violations (`DISTRACTION` state).
 - **Server-Authoritative Focus Sessions**  
-  Sessions are enforced by backend time, never client timers.
-
-- **Event-Sourced Architecture**  
-  All actions (`START`, `BROKEN`, `EXTEND`, `COMPLETE`) are stored as immutable events in SQLite.
-
+  Sessions are strictly enforced by the python backend.
 - **Cryptographic Event Chain**  
-  Every event is hashed (SHA-256) and linked to the previous event. Any manual editing of the database breaks the chain and triggers a system alert.
-
-- **Focus Debt System**  
-  If you break a session, the remaining time is added to your "Focus Debt". It accumulates until paid.
-
-- **Offline-Resilient Architecture**  
-  Local-first design ensures functionality without internet.
-
-- **Single Active Session Rule**  
-  Only one focus contract may exist at a time.
-
-- **Predictive Failure Detection**  
-  Status checks analyze patterns (fatigue, violations) to warn of impending failure.
+  Every event (`START`, `FOCUS_VIOLATION`, `PAUSED`) is hashed (SHA-256) and appended securely.
+- **Data & Logging Pipeline**  
+  Maintains structured logs (`backend/data/activity_log.jsonl`) and tracks ML training frames to continually augment the model over time.
 
 ---
 
 ## 🏗 Architecture Overview
 
-### Backend — Authority & AI Layer
-- Python 3 & Flask
-- Scikit-learn (RandomForest) & SentenceTransformers for AI Window Tracking
-- SQLite (Append-Only Event Log + SHA-256 Chain)
-
-The backend is the **single source of truth** for:
-- Session state  
-- AI prediction & Heuristic evaluating
-- Time progression  
-- Behavioral history  
-- **Integrity verification**
+### Backend — Event Driven Engine Layer
+- **Language/Framework**: Python 3 & Flask
+- **Data Layers**: Local SQLite & JSON Feature stores
+- **Pipeline Components**:
+  - `monitor.py` (Data Extractor via `psutil` / Windows API)
+  - `classifier.py` (NLP & Scikit-Learn Feature Generator)
+  - `engine.py` (State Machine & Drift Decision)
+  
+The backend acts as the immutable arbiter of focus states, tracking time, applying session penalties, and orchestrating the AI evaluations.
 
 ### Frontend — Execution & Rendering Layer
-- Flutter (Windows Desktop)
-- Riverpod (State Management)
-- Glassmorphism & Google Fonts
-- Local Polling via HTTP
+- Web Client / Flask Templates
+- Vanilla CSS featuring CSS Variables and Backdrop-Filters
+- Vanilla JS (Polling the API)
 
-The frontend:
-- Displays state beautifully
-- Animates visual consequences (Lightboxes)
-- Extends sessions via UX triggers
-- **Never enforces rules/time inherently**
+*(Also supports external client implementations like Flutter via the standard JSON API).*
 
 ---
 
@@ -113,25 +82,26 @@ The frontend:
 focuslock/
 │
 ├── backend/
-│   ├── engine.py        # Focus logic, extension overrides
-│   ├── monitor.py       # ML Pipeline, Sentence Embedder, Win32 Observer
+│   ├── engine.py        # Decision State Machine, Drift, Cooldowns
+│   ├── classifier.py    # Hybrid Feature Generator (Heuristics + NLP)
+│   ├── monitor.py       # Data extraction (Window Title + Process Name)
+│   ├── logger.py        # Structured Log initialization
 │   ├── store.py         # Event-sourced SQLite store + Crypto Hashing
 │   ├── train_model.py   # AI Pipeline Training Script
-│   └── dataset_generator.py
+│   ├── dataset_generator.py
+│   └── data/            # Local logging and ML staging data
 │
-├── focuslock_app/       # THE NEW FLUTTER FRONTEND
-│   ├── lib/
-│   │   ├── main.dart
-│   │   ├── providers.dart
-│   │   ├── ui_components.dart
-│   │   ├── api_service.dart
-│   │   ├── setup_session.dart
-│   │   └── active_session.dart
-│   └── pubspec.yaml
+├── focuslock_app/       # Legacy / Optional Flutter Desktop Frontend
+│   └── lib/ ...
 │
-├── templates/           # Legacy Diagnostics/Analytics views
+├── templates/           # Flask HTML Web Client
+│   └── index.html       # Main UI Layout
+├── static/              # Web Client Assets
+│   ├── css/main.css     # Glassmorphism Design System
+│   └── js/client.js     # Dom manipulation and Polling logic
+│
 ├── focuslock.db         # SQLite event log (auto-created)
-├── run.py               # Application Entry (System API)
+├── run.py               # Application Entry (Flask API)
 └── README.md
 ```
 
@@ -140,23 +110,21 @@ focuslock/
 ## ▶️ Running FocusLock
 
 ### 1️⃣ Prerequisites
-- Python 3.9+  
-- Flutter SDK (with Desktop Windows support enabled)
+- **Python 3.9+**
+- (Windows OS recommended for native Win32 window-tracking API compatibility)
 
-### 2️⃣ Start the System API (Backend)
+### 2️⃣ Install Dependencies
 ```bash
-pip install flask sentence-transformers scikit-learn numpy ctypes joblib
+pip install flask sentence-transformers scikit-learn numpy psutil joblib
+```
+*(Note: `ctypes` is standard in Python; you do not need to install `pywin32`)*
+
+### 3️⃣ Start the Application
+To run the server and UI organically:
+```bash
 python run.py
 ```
-> The webserver runs natively on `http://127.0.0.1:5000` executing the API polling mechanism.
-
-### 3️⃣ Start the Application (Frontend)
-In a secondary terminal window:
-```bash
-cd focuslock_app
-flutter pub get
-flutter run -d windows
-```
+> The system will automatically execute the dataset generator (if missing) and open your default web browser to the Glassmorphism application located at `http://127.0.0.1:5000`.
 
 ---
 
@@ -164,8 +132,8 @@ flutter run -d windows
 
 * You cannot start a new session if one is already active.
 * You cannot end a session silently.
-* All failures are logged permanently.
-* The system’s record is final.
+* All failures are logged permanently in the SQLite chain.
+* The system’s decision classification is final.
 
 Deleting the database is equivalent to **resetting your discipline history**.
 
@@ -182,9 +150,5 @@ Deleting the database is equivalent to **resetting your discipline history**.
 
 FocusLock is intentionally strict.
 
-If you are looking for:
-* gentle reminders
-* flexible timers
-* motivational quotes
-
+If you are looking for gentle reminders, flexible timers, or motivational quotes...
 **This system is not for you.**
