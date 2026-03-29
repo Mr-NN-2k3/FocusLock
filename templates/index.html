@@ -79,11 +79,23 @@
                     <input type="number" id="duration" value="25" min="1" max="180">
                 </div>
                 <div class="input-group">
-                    <label for="mode">Mode</label>
-                    <select id="mode">
-                        <option value="deep">Deep Work (Strict)</option>
-                        <option value="standard">Standard (Lenient)</option>
-                    </select>
+                    <label>Mode</label>
+                
+                    <div class="glass-select" id="mode-select">
+                        <div class="glass-select-trigger">
+                            <span id="selected-mode">Deep Work (Strict)</span>
+                            <span class="arrow">▾</span>
+                        </div>
+                
+                        <div class="glass-options hidden">
+                            <div class="glass-option active" data-value="deep">
+                                Deep Work (Strict)
+                            </div>
+                            <div class="glass-option" data-value="standard">
+                                Standard (Lenient)
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="input-group">
                     <label for="whitelist">Whitelist (optional)</label>
