@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // ─── Element Refs ───
+    const mainContainer = document.getElementById('main-container');
     const startForm = document.getElementById('start-form');
     const sessionSetupView = document.getElementById('session-setup-view');
     const sessionActiveView = document.getElementById('session-active-view');
@@ -30,23 +31,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const predictionReason = document.getElementById('prediction-reason');
 
     // Buttons
-    const themeToggle = document.getElementById('theme-toggle');
     const breakBtn = document.getElementById('break-btn');
     const btnContinue = document.getElementById('btn-continue');
     const btnStop = document.getElementById('btn-stop');
     const confirmBreakBtn = document.getElementById('btn-confirm-break');
     const cancelBreakBtn = document.getElementById('btn-cancel-break');
     const breakInput = document.getElementById('break-excuse-input');
-
-    // ─── Theme ───
-    let currentTheme = localStorage.getItem('theme') || 'dark';
-    document.documentElement.setAttribute('data-theme', currentTheme);
-
-    themeToggle.addEventListener('click', () => {
-        currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        document.documentElement.setAttribute('data-theme', currentTheme);
-        localStorage.setItem('theme', currentTheme);
-    });
 
     // ─── Timer ───
     let localRemaining = 0;
@@ -87,13 +77,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const mode = document.getElementById('mode').value;
             const intent = document.getElementById('intent').value.trim();
             const whitelist = document.getElementById('whitelist').value.trim();
-            const blacklist = document.getElementById('blacklist').value.trim();
 
             try {
                 const res = await fetch('/api/start', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ duration, mode, intent, whitelist, blacklist })
+                    body: JSON.stringify({ duration, mode, intent, whitelist, blacklist: "" })
                 });
                 const data = await res.json();
                 if (data.status === 'started') {
@@ -183,6 +172,15 @@ document.addEventListener('DOMContentLoaded', () => {
         sessionSetupView.classList.add('hidden');
         sessionActiveView.classList.remove('hidden');
 
+        // Main glass card dynamic state classes
+        const state = status.current_state || "PRODUCTIVE";
+        if (mainContainer) {
+            mainContainer.classList.remove('focus-animate', 'state-drift', 'state-danger');
+            if (state === "PRODUCTIVE") mainContainer.classList.add('focus-animate');
+            else if (state === "WARNING") mainContainer.classList.add('state-drift');
+            else if (state === "DISTRACTION") mainContainer.classList.add('state-danger');
+        }
+
         // Sync Timer
         localRemaining = status.remaining;
         renderTime(localRemaining);
@@ -192,7 +190,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (penaltyPill) penaltyPill.textContent = `DEBT ${status.penalties || 0}s`;
 
         // State Pill
-        const state = status.current_state || "PRODUCTIVE";
         if (statePill) {
             statePill.textContent = state;
             statePill.className = "status-pill";
@@ -232,11 +229,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (elLatency) elLatency.textContent = `${snap.features.latency_ms || 0}ms`;
 
                 const conf = snap.features.confidence || 0;
-                if (barConf) barConf.style.width = `${conf}%`;
+                if (barConf) barConf.style.width = `${Math.max(5, conf)}%`;
                 if (textConf) textConf.textContent = `${Math.round(conf)}%`;
 
                 const sim = snap.features.semantic_similarity || 0;
-                if (barSim) barSim.style.width = `${Math.min(100, sim * 100)}%`;
+                if (barSim) barSim.style.width = `${Math.max(5, Math.min(100, sim * 100))}%`;
                 if (textSim) textSim.textContent = sim.toFixed(2);
             }
         }
@@ -249,6 +246,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (intent) {
                 intentDisplay.textContent = intent;
                 intentDisplay.classList.remove('hidden');
+            } else {
+                intentDisplay.classList.add('hidden');
             }
         }
 
@@ -275,6 +274,8 @@ document.addEventListener('DOMContentLoaded', () => {
         warningEdge?.classList.add('hidden');
         warningToast?.classList.add('hidden');
 
+        if (mainContainer) mainContainer.classList.remove('focus-animate', 'state-drift', 'state-danger');
+
         const s = status.summary;
         const desc = [
             `Duration: ${s.duration} mins`,
@@ -298,6 +299,8 @@ document.addEventListener('DOMContentLoaded', () => {
         warningToast?.classList.add('hidden');
         completionOverlay?.classList.add('hidden');
         breakOverlay?.classList.add('hidden');
+        
+        if (mainContainer) mainContainer.classList.remove('focus-animate', 'state-drift', 'state-danger');
     }
 
     // ─── Init ───

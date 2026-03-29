@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,72 +10,58 @@
 </head>
 <body>
 
-    <!-- Dynamic Glass Orbs Background -->
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-    <div class="orb orb-3"></div>
-
-    <!-- Theme Toggle -->
-    <button id="theme-toggle" class="theme-toggle" title="Toggle Theme">🌗</button>
-
     <!-- ────────── HARD DISTRACTION OVERLAY ────────── -->
-    <div id="violation-overlay" class="overlay hidden dist-flash">
-        <div class="glass-panel overlay-panel">
-            <div class="text-center">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">🚫</div>
-                <h1 class="text-danger" style="font-size: 2rem;">Distraction Blocked</h1>
-                <p class="text-muted" style="margin: 1rem 0 1.5rem;">Close the unauthorized window to resume your session.</p>
-                <div id="distraction-reason" class="mono reason-box">Analyzing...</div>
-            </div>
+    <div id="violation-overlay" class="danger-overlay hidden">
+        <div class="glass-card overlay-panel state-danger overlay-center">
+            <div class="overlay-icon">🚫</div>
+            <h1 class="title text-danger">Distraction Blocked</h1>
+            <p class="text-muted" style="margin: 1rem 0 0.5rem;">Close the unauthorized window to resume your session.</p>
+            <div id="distraction-reason" class="mono reason-box">Analyzing...</div>
         </div>
     </div>
 
     <!-- ────────── SOFT WARNING OVERLAY ────────── -->
-    <div id="warning-overlay" class="warning-edge hidden"></div>
-    <div id="warning-toast" class="toast hidden">
-        <strong class="text-warning">⚠️ Drift Detected</strong>
-        <p id="warning-reason" class="mono text-muted" style="font-size: 0.8rem; margin-top: 4px;"></p>
+    <div id="warning-overlay" class="warning-overlay hidden"></div>
+    <div id="warning-toast" class="glass-card hidden" style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 10000; padding: 15px 25px; width: auto; max-width: 90%; text-align: center; border-radius: 16px; border-color: rgba(245,158,11,0.4); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+        <strong class="text-warning" style="font-family: var(--font-display); font-size: 1.1rem; letter-spacing: 0.5px;">⚠️ Drift Detected</strong>
+        <p id="warning-reason" class="mono text-muted" style="font-size: 0.75rem; margin-top: 6px;"></p>
     </div>
 
     <!-- ────────── COMPLETION OVERLAY ────────── -->
-    <div id="completion-overlay" class="overlay hidden">
-        <div class="glass-panel overlay-panel">
-            <div class="text-center">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">🎉</div>
-                <h1 class="text-accent" style="font-size: 2rem;">Session Complete</h1>
-                <p id="completion-desc" class="text-muted" style="white-space: pre-wrap; margin: 1.5rem 0; font-size: 0.95rem; line-height: 1.6;"></p>
-                <div style="display: flex; gap: 1rem;">
-                    <button id="btn-continue" class="btn" style="flex: 1;">+10 MIN & STREAK</button>
-                    <button id="btn-stop" class="btn btn-outline" style="flex: 1;">END SESSION</button>
-                </div>
+    <div id="completion-overlay" class="danger-overlay hidden" style="animation: none;">
+        <div class="glass-card overlay-panel glow-purple overlay-center">
+            <div class="overlay-icon text-accent">🎉</div>
+            <h1 class="title text-accent">Session Complete</h1>
+            <p id="completion-desc" class="text-muted" style="white-space: pre-wrap; margin: 1.5rem 0; font-size: 0.95rem; line-height: 1.6;"></p>
+            <div style="display: flex; gap: 1rem;">
+                <button id="btn-continue" class="glass-button glow-purple" style="flex: 1;">+10 MIN & STREAK</button>
+                <button id="btn-stop" class="glass-button" style="flex: 1; background: transparent;">END SESSION</button>
             </div>
         </div>
     </div>
 
     <!-- ────────── BREAK OVERLAY ────────── -->
-    <div id="break-overlay" class="overlay hidden">
-        <div class="glass-panel overlay-panel">
-            <div class="text-center">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">⚡</div>
-                <h1 class="text-danger" style="font-size: 2rem;">Emergency Break</h1>
-                <p class="text-muted" style="margin: 1rem 0;">Why are you breaking the contract?</p>
-                <input type="text" id="break-excuse-input" placeholder="Enter your reason..." autocomplete="off" style="margin-bottom: 1.5rem;">
-                <div style="display: flex; gap: 1rem;">
-                    <button id="btn-confirm-break" class="btn" style="flex: 1; background: var(--danger);">CONFIRM BREAK</button>
-                    <button id="btn-cancel-break" class="btn btn-outline" style="flex: 1;">CANCEL</button>
-                </div>
+    <div id="break-overlay" class="danger-overlay hidden" style="animation: none;">
+        <div class="glass-card overlay-panel state-danger overlay-center">
+            <div class="overlay-icon">⚡</div>
+            <h1 class="title text-danger">Emergency Break</h1>
+            <p class="text-muted" style="margin: 1rem 0;">Why are you breaking the contract?</p>
+            <input type="text" id="break-excuse-input" placeholder="Enter your reason..." autocomplete="off" style="margin-bottom: 1.5rem;">
+            <div style="display: flex; gap: 1rem;">
+                <button id="btn-confirm-break" class="glass-button danger" style="flex: 1;">CONFIRM BREAK</button>
+                <button id="btn-cancel-break" class="glass-button" style="flex: 1; background: transparent;">CANCEL</button>
             </div>
         </div>
     </div>
 
     <!-- ────────── MAIN CONTAINER ────────── -->
-    <div class="neo-container">
+    <div id="main-container" class="glass-card">
 
         <!-- Header -->
-        <header class="text-center" style="margin-bottom: 2rem;">
-            <h1>Focus<span class="text-accent">Lock</span></h1>
-            <p class="mono text-muted" style="font-size: 0.8rem; margin-top: 0.3rem;">Cognitive Behavior Engine v3</p>
-            <div class="stats-row">
+        <header class="text-center" style="margin-bottom: 2.5rem;">
+            <h1 class="title">Focus<span class="text-accent">Lock</span></h1>
+            <p class="subtitle" style="margin-top: 0.5rem;">Cognitive Behavior Engine</p>
+            <div class="stats-row" style="margin-top: 1rem;">
                 <span class="status-pill active">LVL <span id="user-level">1</span></span>
                 <span class="status-pill">XP <span id="user-xp">0</span></span>
             </div>
@@ -92,26 +78,20 @@
                     <label for="duration">Duration (minutes)</label>
                     <input type="number" id="duration" value="25" min="1" max="180">
                 </div>
-                <div class="two-col">
-                    <div class="input-group">
-                        <label for="mode">Mode</label>
-                        <select id="mode">
-                            <option value="deep">Deep Work (Strict)</option>
-                            <option value="standard">Standard (Lenient)</option>
-                        </select>
-                    </div>
+                <div class="input-group">
+                    <label for="mode">Mode</label>
+                    <select id="mode">
+                        <option value="deep">Deep Work (Strict)</option>
+                        <option value="standard">Standard (Lenient)</option>
+                    </select>
                 </div>
                 <div class="input-group">
-                    <label for="whitelist">Whitelist (optional, comma-separated)</label>
+                    <label for="whitelist">Whitelist (optional)</label>
                     <input type="text" id="whitelist" placeholder="e.g. stackoverflow, docs, localhost">
-                    <p class="mono text-muted hint">If set, ONLY these keywords are allowed.</p>
+                    <p class="mono hint">ONLY these keywords are allowed if set.</p>
                 </div>
-                <div class="input-group">
-                    <label for="blacklist">Blacklist (optional, comma-separated)</label>
-                    <input type="text" id="blacklist" placeholder="e.g. twitter, youtube">
-                    <p class="mono text-muted hint">Explicitly blocked, in addition to AI detection.</p>
-                </div>
-                <button type="submit" class="btn" id="btn-start">INITIALIZE ENGINE</button>
+                <!-- Blacklist hidden to simplify layout per premium quiet UI rules, but still submittable if added -->
+                <button type="submit" class="glass-button glow-purple" id="btn-start" style="margin-top: 1rem; padding: 14px;">INITIALIZE ENGINE</button>
             </form>
         </div>
 
@@ -119,44 +99,53 @@
         <div id="session-active-view" class="hidden">
 
             <!-- Timer Card -->
-            <div class="focus-card text-center">
-                <h2 id="timer-display" class="timer-text">00:00</h2>
-                <p class="mono text-muted" style="margin-bottom: 0.8rem;">REMAINING</p>
-                <span class="status-pill active" id="session-state-pill">PRODUCTIVE</span>
-                <span class="status-pill danger" id="penalty-pill" style="margin-left: 0.5rem;">DEBT 0s</span>
+            <div class="inner-glass text-center" style="margin-bottom: 1.5rem; padding: 2rem 1rem;">
+                <h2 id="timer-display" class="timer">00:00</h2>
+                <p class="subtitle" style="margin-bottom: 1rem;">REMAINING</p>
+                <div>
+                    <span class="status-pill active" id="session-state-pill">PRODUCTIVE</span>
+                    <span class="status-pill danger" id="penalty-pill" style="margin-left: 0.5rem;">DEBT 0s</span>
+                </div>
             </div>
 
             <!-- Intent Display -->
-            <div id="current-intent-display" class="intent-display hidden"></div>
+            <div id="current-intent-display" class="inner-glass hidden" style="margin-bottom: 1.5rem; font-style: italic; font-size: 0.85rem; color: var(--text-muted); padding: 1rem;"></div>
 
             <!-- Activity Telemetry -->
-            <div class="activity-tracker" style="margin-top: 1.5rem;">
-                <label>Live Telemetry</label>
-                <div class="telemetry-box">
-                    <div class="telemetry-header">
-                        <span class="mono text-accent" id="app-name">—</span>
-                        <span class="mono text-muted" id="latency-ms">—</span>
+            <div class="activity-tracker">
+                <p class="subtitle" style="margin-bottom: 0.8rem;">Live Telemetry</p>
+                <div class="inner-glass">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem;">
+                        <span class="mono text-secondary" id="app-name" style="font-size: 13px; font-weight: 700;">—</span>
+                        <span class="mono text-muted" id="latency-ms" style="font-size: 11px;">—</span>
                     </div>
-                    <div class="mono" id="window-title" style="font-size: 0.8rem; margin-bottom: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-muted);">Waiting for telemetry...</div>
+                    <div class="mono text-muted" id="window-title" style="font-size: 11px; margin-bottom: 1.5rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0.8;">Waiting for telemetry...</div>
 
-                    <div class="telemetry-bar-container" title="Confidence">
-                        <div class="telemetry-bar-fill conf-fill" id="conf-bar" style="width: 0%;"></div>
-                        <span class="bar-label">CONFIDENCE <span id="conf-text">0%</span></span>
+                    <div class="bar-label-wrapper">
+                        <span>CONFIDENCE</span>
+                        <span id="conf-text">0%</span>
                     </div>
-                    <div class="telemetry-bar-container" title="Semantic Similarity">
-                        <div class="telemetry-bar-fill sim-fill" id="sim-bar" style="width: 0%;"></div>
-                        <span class="bar-label">SEMANTICS <span id="sim-text">0.00</span></span>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="conf-bar"></div>
+                    </div>
+                    
+                    <div class="bar-label-wrapper" style="margin-top: 1rem;">
+                        <span>SEMANTIC MATCH</span>
+                        <span id="sim-text">0.00</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="sim-bar" style="background: linear-gradient(90deg, #F59E0B, #EF4444);"></div>
                     </div>
                 </div>
             </div>
 
             <!-- Prediction Alert -->
-            <div id="prediction-alert" class="prediction hidden">
-                <strong class="text-danger">⚠ FAILURE PREDICTED</strong>
-                <p id="prediction-reason" class="mono text-muted" style="font-size: 0.8rem; margin-top: 4px;"></p>
+            <div id="prediction-alert" class="inner-glass hidden" style="margin-top: 1.5rem; border-color: rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.05);">
+                <strong class="text-danger" style="font-family: var(--font-display); font-size: 14px;">⚠ FAILURE PREDICTED</strong>
+                <p id="prediction-reason" class="mono text-muted" style="font-size: 11px; margin-top: 6px;"></p>
             </div>
 
-            <button id="break-btn" class="btn btn-outline" style="margin-top: 1.5rem;">EMERGENCY BREAK</button>
+            <button id="break-btn" class="glass-button" style="margin-top: 2rem; background: transparent;">EMERGENCY BREAK</button>
         </div>
 
     </div>
