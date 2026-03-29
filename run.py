@@ -1,8 +1,17 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, make_response
 from backend.engine import FocusEngine
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 engine = FocusEngine()
+
+# Bug #14 (partial): Add CORS headers for Flutter/web frontend compatibility.
+# For production, replace with flask-cors + auth + rate limiting.
+@app.after_request
+def add_cors_headers(response):
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    return response
 
 
 @app.route("/")
@@ -34,8 +43,21 @@ def analytics():
 
 @app.route("/api/start", methods=["POST"])
 def api_start():
-    data = request.json
-    
+    data = request.json or {}
+
+    # Bug #2 Fix: Validate that duration is present
+    duration = data.get("duration")
+    if duration is None:
+        return jsonify({"error": "duration is required"}), 400
+
+    # Bug #8 Fix: Reject invalid range (must be 1-1440 minutes i.e. 1 min to 24 hours)
+    try:
+        duration = int(duration)
+    except (TypeError, ValueError):
+        return jsonify({"error": "duration must be an integer"}), 400
+    if duration <= 0 or duration > 1440:
+        return jsonify({"error": "duration must be between 1 and 1440 minutes"}), 400
+
     # Handle whitelist/blacklist as either arrays or comma-separated strings
     wl = data.get("whitelist", [])
     bl = data.get("blacklist", [])
@@ -45,7 +67,7 @@ def api_start():
         bl = [x.strip() for x in bl.split(",") if x.strip()]
 
     engine.start_session(
-        data["duration"],
+        duration,
         data.get("mode", "deep"),
         whitelist=wl,
         blacklist=bl,

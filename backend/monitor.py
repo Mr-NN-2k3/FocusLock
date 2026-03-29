@@ -2,6 +2,7 @@ import ctypes
 from ctypes import wintypes
 import threading
 import time
+import platform
 import psutil
 
 class WindowMonitor:
@@ -11,11 +12,18 @@ class WindowMonitor:
     Does NOT contain classification logic.
     """
     def __init__(self, callback_state_change=None):
+        # Bug #1 Fix: Guard against non-Windows platforms
+        if platform.system() != "Windows":
+            raise NotImplementedError(
+                f"WindowMonitor is only supported on Windows. "
+                f"Current platform: {platform.system()}"
+            )
+
         self.callback_state_change = callback_state_change
         self.running = False
         self.thread = None
         self.last_state_hash = None
-        
+
         # Load Windows API DLLs
         self.user32 = ctypes.windll.user32
         self.user32.GetForegroundWindow.restype = wintypes.HWND
@@ -49,29 +57,35 @@ class WindowMonitor:
 
     def _monitor_loop(self):
         while self.running:
-            title, app_name = self._get_active_window_info()
-            
-            # Ignore OS level switching overlays
-            if title in ["Task Switching", "Task View", "Program Manager"]:
-                time.sleep(1)
-                continue
-                
-            state = {
-                "title": title,
-                "app": app_name,
-                "url": "" # Reserved for future browser extension integration
-            }
-            
-            state_hash = f"{title}_{app_name}"
-            
-            if state_hash != self.last_state_hash:
-                self.last_state_hash = state_hash
-                if self.callback_state_change:
-                    self.callback_state_change(state)
+            try:
+                # Bug #12 Fix: Wrap the entire loop body so thread never dies silently
+                title, app_name = self._get_active_window_info()
 
-            # Polling frequency - Since we debounce on change, we can poll reasonably fast (e.g. 1s)
-            # without triggering downstream expensive NLP logic multiple times.
-            time.sleep(1)
+                # Ignore OS level switching overlays
+                if title in ["Task Switching", "Task View", "Program Manager"]:
+                    time.sleep(1)
+                    continue
+
+                state = {
+                    "title": title,
+                    "app": app_name,
+                    "url": ""  # Reserved for future browser extension integration
+                }
+
+                state_hash = f"{title}_{app_name}"
+
+                if state_hash != self.last_state_hash:
+                    self.last_state_hash = state_hash
+                    if self.callback_state_change:
+                        self.callback_state_change(state)
+
+                # Polling frequency - debounce on change so downstream NLP only fires when needed
+                time.sleep(1)
+
+            except Exception as e:
+                # Log and keep running; don't let a transient error kill the thread
+                print(f"[WindowMonitor] Error in monitor loop: {e}")
+                time.sleep(1)
 
     def start(self):
         if self.running: return

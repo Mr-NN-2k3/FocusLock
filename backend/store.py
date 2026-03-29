@@ -1,9 +1,13 @@
 import sqlite3
 import json
 import hashlib
+import os
 from datetime import datetime
 
-DB_FILE = "focuslock.db"
+# Bug #6 Fix: Use absolute path so the DB is always in the same place
+# regardless of where Flask/Python is invoked from.
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_FILE = os.path.join(BASE_DIR, "..", "focuslock.db")
 
 
 class EventStore:
@@ -99,6 +103,15 @@ class EventStore:
             last_hash = r[5] if r[5] else "GENESIS_HASH"
             
         return True, "Integrity Verified"
+
+    # Bug #7 Fix: Prevent unbounded event table growth by archiving old events
+    def purge_old_events(self, days_to_keep=30):
+        """Delete events older than `days_to_keep` days to prevent memory/disk bloat."""
+        from datetime import timedelta
+        cutoff = (datetime.now() - timedelta(days=days_to_keep)).isoformat()
+        with sqlite3.connect(DB_FILE) as conn:
+            conn.execute("DELETE FROM events WHERE timestamp < ?", (cutoff,))
+        print(f"[EventStore] Purged events older than {days_to_keep} days.")
 
     # -------- PROJECTIONS --------
 

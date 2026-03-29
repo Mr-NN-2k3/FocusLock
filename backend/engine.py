@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 import time
 import uuid
+import threading
 
 from .store import EventStore
 from .monitor import WindowMonitor
@@ -14,27 +15,37 @@ PREDICTION_THRESHOLD = 2
 DRIFT_WINDOW_SEC = 60
 DRIFT_THRESHOLD = 5
 
+# Bug #9 Fix: Enforce explicit FSM state transitions
+ALLOWED_TRANSITIONS = {
+    "PRODUCTIVE": ["PRODUCTIVE", "WARNING"],
+    "WARNING": ["WARNING", "DISTRACTION", "PRODUCTIVE"],
+    "DISTRACTION": ["DISTRACTION", "WARNING"],
+}
+
 class FocusEngine:
     def __init__(self):
         self.store = EventStore()
         self.active_monitor = None
-        
+
+        # Bug #3 Fix: Lock to protect shared state accessed from monitor thread
+        self._lock = threading.Lock()
+
         # Runtime session overrides
         self.is_paused = False
         self.total_paused_duration = 0
         self.pause_start_time = None
-        
+
         # State Management
-        self.current_state = "PRODUCTIVE" # PRODUCTIVE, WARNING, DISTRACTION
+        self.current_state = "PRODUCTIVE"  # PRODUCTIVE, WARNING, DISTRACTION
         self.last_state = "PRODUCTIVE"
         self.last_alert_time = 0
-        self.alert_cooldown = 10 # 10 secs before spamming again at the same state level
-        
-        self.last_classified_state = None # To expose current app details to UI
-        
+        self.alert_cooldown = 10  # 10 secs before spamming again at the same state level
+
+        self.last_classified_state = None  # To expose current app details to UI
+
         # Drift Tracking
         self.recent_switches = []
-        
+
         self._check_resume_session()
 
     def _check_resume_session(self):
@@ -94,17 +105,22 @@ class FocusEngine:
     # -------- EVENT DRIVEN PIPELINE --------
 
     def _on_state_change(self, raw_state):
-        if self.is_paused: return
+        if self.is_paused:
+            return
         session = self.store.get_current_session()
-        if not session: return
-        
+        if not session:
+            return
+
         now = time.time()
-        
-        # 1. Drift Tracking
-        self.recent_switches.append(now)
-        self.recent_switches = [t for t in self.recent_switches if now - t <= DRIFT_WINDOW_SEC]
-        is_drifting = len(self.recent_switches) > DRIFT_THRESHOLD
-        
+
+        # 1. Drift Tracking (Bug #10 Fix: time-decay already in place, keep trimmed)
+        with self._lock:
+            self.recent_switches.append(now)
+            self.recent_switches = [
+                t for t in self.recent_switches if now - t <= DRIFT_WINDOW_SEC
+            ]
+            is_drifting = len(self.recent_switches) > DRIFT_THRESHOLD
+
         # 2. Extract Features
         features = clf.extract_features(
             state=raw_state,
@@ -113,12 +129,12 @@ class FocusEngine:
             whitelist=session.get("whitelist", []),
             blacklist=session.get("blacklist", [])
         )
-        
+
         # 3. Decision Logic
         new_state = "PRODUCTIVE"
         reason = "Aligned"
         confidence = features["confidence"]
-        
+
         if features["whitelist_match"]:
             new_state = "PRODUCTIVE"
             reason = "Whitelist match"
@@ -138,29 +154,38 @@ class FocusEngine:
                 new_state = "PRODUCTIVE"
                 reason = "Aligned"
             else:
-                new_state = "PRODUCTIVE" # Ambiguous is productive by default unless drifting
+                new_state = "PRODUCTIVE"  # Ambiguous → productive by default unless drifting
 
         if is_drifting and new_state == "PRODUCTIVE":
             new_state = "WARNING"
             reason = "Drift Detected (Frequent Switching)"
 
-        self.last_state = self.current_state
-        self.current_state = new_state
-        self.last_classified_state = {
-            "app": raw_state.get("app", ""),
-            "title": raw_state.get("title", ""),
-            "state": new_state,
-            "features": features,
-            "reason": reason
-        }
-        
+        # Bug #9 Fix: Enforce FSM transitions — only allow valid state changes
+        with self._lock:
+            allowed = ALLOWED_TRANSITIONS.get(self.current_state, [])
+            if new_state not in allowed:
+                # Snap to the closest allowed state instead of jumping illegally
+                new_state = self.current_state
+
+            self.last_state = self.current_state
+            self.current_state = new_state
+            self.last_classified_state = {
+                "app": raw_state.get("app", ""),
+                "title": raw_state.get("title", ""),
+                "state": new_state,
+                "features": features,
+                "reason": reason
+            }
+            last_alert_time_snapshot = self.last_alert_time
+
         # 4. Intervention & Cooldown Layer
         if self.current_state != "PRODUCTIVE":
-            if self.current_state != self.last_state or (now - self.last_alert_time) > self.alert_cooldown:
-                self.last_alert_time = now
+            if self.current_state != self.last_state or (now - last_alert_time_snapshot) > self.alert_cooldown:
+                with self._lock:
+                    self.last_alert_time = now
                 if self.current_state == "DISTRACTION":
-                     self.register_violation(f"DISTRACTION: {reason}")
-        
+                    self.register_violation(f"DISTRACTION: {reason}")
+
         # 5. Logging
         logger.log_activity(
             timestamp=datetime.now().isoformat(),
@@ -171,7 +196,7 @@ class FocusEngine:
             classification=self.current_state,
             reason=reason
         )
-        
+
         logger.log_training_row(
             title=raw_state.get("title", ""),
             app=raw_state.get("app", ""),

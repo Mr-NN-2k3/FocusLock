@@ -34,24 +34,37 @@ class FeatureClassifier:
         }
 
     def _init_models_bg(self):
+        # Bug #5 Fix: track loading errors so they are visible, not swallowed silently
+        self.ml_error = None
+
         def load():
+            # --- Sentence Transformer ---
             try:
                 from sentence_transformers import SentenceTransformer, util
-                # We save util reference for later
                 self.util = util
                 self.embedder = SentenceTransformer('all-MiniLM-L6-v2')
+                print("[Classifier] SentenceTransformer loaded successfully.")
             except Exception as e:
-                print(f"Failed to load sentence-transformers: {e}")
+                self.ml_error = f"SentenceTransformer failed: {e}"
+                print(f"[Classifier] WARNING: {self.ml_error}. Falling back to heuristics only.")
 
+            # --- Scikit-Learn Model ---
             if os.path.exists(self.model_path):
                 try:
                     artifacts = joblib.load(self.model_path)
                     self.model = artifacts.get("model")
                     self.tfidf = artifacts.get("tfidf")
                     self.ml_ready = True
+                    print("[Classifier] ML model loaded successfully.")
                 except Exception as e:
-                    print(f"Failed to load ML artifacts: {e}")
-        
+                    err = f"ML artifact loading failed: {e}"
+                    self.ml_error = (self.ml_error + " | " + err) if self.ml_error else err
+                    print(f"[Classifier] WARNING: {err}. Classification will use heuristics only.")
+            else:
+                msg = f"Model file not found at {self.model_path}. Run train_model.py first."
+                self.ml_error = (self.ml_error + " | " + msg) if self.ml_error else msg
+                print(f"[Classifier] WARNING: {msg}")
+
         # Load in background so UI isn't blocked on startup
         threading.Thread(target=load, daemon=True).start()
 
