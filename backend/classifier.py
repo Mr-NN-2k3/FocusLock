@@ -1,3 +1,17 @@
+"""
+FeatureClassifier — Cognitive Behaviour Engine (Feature Generator)
+==================================================================
+Extracts features and performs hybrid classification:
+  Heuristic (personalized, intent-aware) → Embeddings (semantic) → ML model
+
+Key upgrades over the original:
+  • concept_weights are now per-intent, pulled live from UserProfile
+  • Intent scoring replaced with IntentProfile.score_activity() — signals + strength
+  • apply_session_feedback() supports real-time weight correction (auto + manual)
+  • ml_error / ml_status exposed for health checks
+  • 100 ms classification budget enforced as before
+"""
+
 import os
 import time
 import joblib
@@ -5,191 +19,260 @@ import numpy as np
 import concurrent.futures
 import threading
 
+from .user_profile import user_profile
+from .intent_engine import IntentProfile
+
+
 class FeatureClassifier:
-    """
-    Cognitive Behavior Engine: Feature Generator
-    Extracts features and performs a hybrid classification (Heuristic -> Embeddings).
-    Returns ONLY features, not the final decision.
-    """
+
     def __init__(self):
         self.model_path = os.path.join(os.path.dirname(__file__), "focus_model.pkl")
-        self.ml_ready = False
-        self.model = None
-        self.tfidf = None
-        self.embedder = None
-        
-        # We load embedder lazily or in background so init is fast
+        self.ml_ready   = False
+        self.model      = None
+        self.tfidf      = None
+        self.embedder   = None
+        self.util       = None
+
         self._init_models_bg()
 
-        # Base concept weights (Heuristics) - Data-driven mapping
-        self.concept_weights = {
-            "python": 10, "javascript": 10, "c++": 10, "java": 10, "code": 15, "github": 15,
-            "vs code": 20, "pycharm": 20, "debug": 20, "docs": 15, "stackoverflow": 20,
-            "aws": 10, "azure": 10, "cloud": 10,
-            
-            "youtube": -10, "netflix": -30, "twitch": -25, "video": -10, "movie": -20,
-            "twitter": -20, "facebook": -20, "instagram": -25, "tiktok": -40, "reddit": -15,
-            "game": -30, "steam": -30, "discord": 0, # Neutral discord as it can be work or play
-            "shopping": -20, "amazon": -15, "news": -10
-        }
+    # ── Model Loading ─────────────────────────────────────────────────────────
 
     def _init_models_bg(self):
-        # Bug #5 Fix: track loading errors so they are visible, not swallowed silently
+        """Load heavy models in a background thread so startup stays fast."""
         self.ml_error = None
 
         def load():
-            # --- Sentence Transformer ---
+            # Sentence-Transformer
             try:
                 from sentence_transformers import SentenceTransformer, util
-                self.util = util
-                self.embedder = SentenceTransformer('all-MiniLM-L6-v2')
+                self.util     = util
+                self.embedder = SentenceTransformer("all-MiniLM-L6-v2")
                 print("[Classifier] SentenceTransformer loaded successfully.")
             except Exception as e:
                 self.ml_error = f"SentenceTransformer failed: {e}"
-                print(f"[Classifier] WARNING: {self.ml_error}. Falling back to heuristics only.")
+                print(f"[Classifier] WARNING: {self.ml_error} — heuristics only.")
 
-            # --- Scikit-Learn Model ---
+            # Scikit-Learn model
             if os.path.exists(self.model_path):
                 try:
-                    artifacts = joblib.load(self.model_path)
+                    artifacts  = joblib.load(self.model_path)
                     self.model = artifacts.get("model")
                     self.tfidf = artifacts.get("tfidf")
                     self.ml_ready = True
                     print("[Classifier] ML model loaded successfully.")
                 except Exception as e:
-                    err = f"ML artifact loading failed: {e}"
-                    self.ml_error = (self.ml_error + " | " + err) if self.ml_error else err
-                    print(f"[Classifier] WARNING: {err}. Classification will use heuristics only.")
+                    err = f"ML artifact load failed: {e}"
+                    self.ml_error = (
+                        (self.ml_error + " | " + err) if self.ml_error else err
+                    )
+                    print(f"[Classifier] WARNING: {err}")
             else:
-                msg = f"Model file not found at {self.model_path}. Run train_model.py first."
-                self.ml_error = (self.ml_error + " | " + msg) if self.ml_error else msg
+                msg = f"Model not found at {self.model_path}. Run train_model.py."
+                self.ml_error = (
+                    (self.ml_error + " | " + msg) if self.ml_error else msg
+                )
                 print(f"[Classifier] WARNING: {msg}")
 
-        # Load in background so UI isn't blocked on startup
         threading.Thread(target=load, daemon=True).start()
 
-    def extract_features(self, state, intent, mode, whitelist, blacklist):
+    def ml_status(self) -> dict:
+        """Expose ML health state for /api/status and /api/profile."""
+        return {
+            "ml_ready":    self.ml_ready,
+            "ml_error":    self.ml_error,
+            "embedder_ok": self.embedder is not None,
+        }
+
+    # ── Feature Extraction ────────────────────────────────────────────────────
+
+    def extract_features(
+        self,
+        state:          dict,
+        intent:         str,
+        mode:           str,
+        whitelist:      list,
+        blacklist:      list,
+        intent_profile: "IntentProfile | None" = None,
+    ) -> dict:
         """
-        Input: state = {"title": "...", "app": "...", "url": "..."}
-        Output: Feature Dictionary
-        Enforces a <100ms budget limit.
+        Input:  state = {"title": "...", "app": "...", "url": "..."}
+        Output: feature dictionary consumed by the engine's decision layer.
+
+        Pipeline (< 100 ms budget):
+          1. Whitelist / Blacklist overrides   (O(n) string scan)
+          2. Personalized heuristic pass        (UserProfile.get_all_weights)
+          3. Intent-aware scoring               (IntentProfile.score_activity)
+          4. Semantic embeddings fallback       (capped at budget remainder)
+          5. Confidence calibration
         """
         start_time = time.time()
-        
-        title = (state.get("title") or "").lower()
-        app = (state.get("app") or "").lower()
-        url = (state.get("url") or "").lower()
+
+        title  = (state.get("title") or "").lower()
+        app    = (state.get("app")   or "").lower()
+        url    = (state.get("url")   or "").lower()
         intent = (intent or "").lower()
-        mode_val = 2 if mode == "deep" else 1
-        
-        full_text = f"{title} {app} {url}"
 
-        # 1. Strict Overrides (Whitelist / Blacklist)
-        is_whitelist = False
-        is_blacklist = False
-        if whitelist:
-            for w in whitelist:
-                if w.lower() in full_text: is_whitelist = True
-        
-        if blacklist:
-            for b in blacklist:
-                if b.lower() in full_text: is_blacklist = True
+        intent_key = intent_profile.intent_key if intent_profile else "global"
+        full_text  = f"{title} {app} {url}"
 
-        # 2. Fast Heuristic Pass
-        heuristic_score = 0
-        intent_match = False
+        # ── 1. Strict Overrides ───────────────────────────────────────────────
+        is_whitelist = any(w.lower() in full_text for w in (whitelist or []))
+        is_blacklist = any(b.lower() in full_text for b in (blacklist or []))
+
+        # ── 2. Personalized Heuristic Pass ────────────────────────────────────
+        # Pull merged weights (base defaults + user-learned deltas) for this intent
+        concept_weights = user_profile.get_all_weights(intent_key)
+
+        heuristic_score  = 0
         matched_concepts = []
-        
-        # Base Match
-        for concept, weight in self.concept_weights.items():
+
+        for concept, weight in concept_weights.items():
             if concept in full_text:
                 heuristic_score += weight
                 matched_concepts.append(concept)
-                
-        # Intent Boost
-        intent_words = [w for w in intent.split() if len(w) > 3]
-        for word in intent_words:
-            if word in full_text:
-                heuristic_score += 20  # Contextual Boost
-                intent_match = True
 
-        # 3. Embeddings Fallback (If Ambiguous + Budget Check)
-        # If Heuristic is very strong (-40 or +40), we might not need embeddings.
+        # ── 3. Intent-Aware Scoring ───────────────────────────────────────────
+        intent_boost      = 0
+        negative_override = False
+        intent_reason     = "No intent profile"
+        intent_match      = False
+
+        if intent_profile and intent_profile.strength > 0:
+            result            = intent_profile.score_activity(full_text)
+            intent_boost      = result["intent_boost"]
+            negative_override = result["negative_override"]
+            intent_reason     = result["intent_reason"]
+            intent_match      = intent_boost != 0
+
+            heuristic_score  += intent_boost
+
+        else:
+            # Legacy flat keyword boost (fallback when no IntentProfile supplied)
+            intent_words = [w for w in intent.split() if len(w) > 3]
+            for word in intent_words:
+                if word in full_text:
+                    heuristic_score += 20
+                    intent_match     = True
+            intent_reason = "Legacy intent keyword boost"
+
+        # ── 4. Semantic Embeddings Fallback ───────────────────────────────────
         semantic_similarity = 0.0
-        ml_prob = 0.0
-        
-        # We only run embeddings if within budget (< 100ms) and if embedder loaded
+        ml_prob             = 0.0
+
         if self.embedder is not None and self.util is not None:
-            # We use an executor to enforce timeout
             with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
                 future = executor.submit(self._run_ml_pipeline, intent, full_text)
-                time_elapsed = (time.time() - start_time) * 1000
-                budget_left = max(0, 100 - time_elapsed) / 1000.0
-                
+                elapsed_ms  = (time.time() - start_time) * 1000
+                budget_left = max(0.0, 100.0 - elapsed_ms) / 1000.0
                 try:
                     semantic_similarity, ml_prob = future.result(timeout=budget_left)
                 except concurrent.futures.TimeoutError:
-                    print("WARN: Classification exceeded 100ms budget. Falling back to heuristics.")
+                    print("[Classifier] WARN: Budget exceeded — heuristics only.")
 
-        # 4. Confidence Calibration
-        # Base confidence from semantic similarity and heuristic agreement
-        confidence = 50.0 # Neutral uncertainty
-        
-        if is_whitelist or is_blacklist:
+        # ── 5. Confidence Calibration ─────────────────────────────────────────
+        if is_whitelist or is_blacklist or negative_override:
             confidence = 100.0
         else:
-            # If heuristic and semantics agree, confidence goes up
+            confidence = 50.0  # neutral baseline
+
             heur_sign = 1 if heuristic_score > 0 else (-1 if heuristic_score < 0 else 0)
-            sem_sign = 1 if semantic_similarity > 0.4 else (-1 if semantic_similarity < 0.2 else 0)
-            
+            sem_sign  = (
+                1  if semantic_similarity > 0.4
+                else (-1 if semantic_similarity < 0.2 else 0)
+            )
+
             if heur_sign == sem_sign and heur_sign != 0:
                 confidence = min(95.0, confidence + 30 + abs(heuristic_score))
             elif heur_sign != 0:
                 confidence = min(85.0, confidence + abs(heuristic_score))
-            
+
             if intent_match:
                 confidence = min(95.0, confidence + 20)
+
+            # Intent profile strength amplifies confidence further (more specific = more sure)
+            if intent_profile and intent_profile.strength > 0.5:
+                confidence = min(98.0, confidence + 10 * intent_profile.strength)
 
         latency_ms = int((time.time() - start_time) * 1000)
 
         return {
             "semantic_similarity": round(float(semantic_similarity), 3),
-            "heuristic_score": heuristic_score,
-            "ml_probability": round(float(ml_prob), 3),
-            "intent_match": intent_match,
-            "whitelist_match": is_whitelist,
-            "blacklist_match": is_blacklist,
-            "matched_concepts": matched_concepts,
-            "confidence": round(float(confidence), 1),
-            "mode": mode,
-            "latency_ms": latency_ms
+            "heuristic_score":     heuristic_score,
+            "ml_probability":      round(float(ml_prob), 3),
+            "intent_match":        intent_match,
+            "intent_boost":        intent_boost,
+            "intent_reason":       intent_reason,
+            "negative_override":   negative_override,
+            "whitelist_match":     is_whitelist,
+            "blacklist_match":     is_blacklist,
+            "matched_concepts":    matched_concepts,
+            "confidence":          round(float(confidence), 1),
+            "mode":                mode,
+            "intent_key":          intent_key,
+            "latency_ms":          latency_ms,
         }
 
-    def _run_ml_pipeline(self, intent, text):
-        """Runs the expensive SentenceTransformer & Scikit-Learn logic."""
-        sim = 0.0
+    # ── Real-time Feedback (Layer 1 + Layer 2) ────────────────────────────────
+
+    def apply_session_feedback(
+        self,
+        app:           str,
+        title:         str,
+        correct_label: str,   # "PRODUCTIVE" | "WARNING" | "DISTRACTION"
+        intent_key:    str  = "global",
+        manual:        bool = False,
+    ):
+        """
+        Apply a real-time learning signal to the user profile.
+
+        Layer 1 (auto):   called by engine on violation or session-end.
+        Layer 2 (manual): called by engine on user thumbs-up/down feedback.
+
+        The concept learned is the app process name (normalised) so that
+        future classifications of the same app in the same intent context
+        get a personalized score immediately — no retraining required.
+        """
+        concept   = (app or title or "").lower().strip().split(".")[0]  # strip .exe etc.
+        direction = "negative" if correct_label == "DISTRACTION" else "positive"
+
+        if concept:
+            user_profile.apply_feedback(
+                concept    = concept,
+                direction  = direction,
+                intent_key = intent_key,
+                manual     = manual,
+            )
+            action = "Manual" if manual else "Auto"
+            print(
+                f"[Classifier] {action} feedback → '{concept}' "
+                f"({direction}) in intent '{intent_key}'"
+            )
+
+    # ── ML Pipeline (budget-capped) ───────────────────────────────────────────
+
+    def _run_ml_pipeline(self, intent: str, text: str):
+        """Runs SentenceTransformer + Scikit-Learn inside the 100 ms budget."""
+        sim  = 0.0
         prob = 0.0
+
         try:
             g_emb = self.embedder.encode(intent, convert_to_tensor=True)
-            t_emb = self.embedder.encode(text, convert_to_tensor=True)
-            sim = max(0.0, self.util.cos_sim(g_emb, t_emb).item())
-        except Exception as e:
+            t_emb = self.embedder.encode(text,   convert_to_tensor=True)
+            sim   = max(0.0, self.util.cos_sim(g_emb, t_emb).item())
+        except Exception:
             pass
 
         if self.ml_ready and self.model and self.tfidf:
             try:
                 tfidf_vec = self.tfidf.transform([text]).toarray()
-                # Assuming mode is fixed to Deep=2 for pure ML pipeline context right now
-                features = np.hstack(([[sim, 2]], tfidf_vec))
-                probs = self.model.predict_proba(features)[0]
-                # Assuming index 0 is Distraction and 1 is Productive or similar.
-                # Since we don't know the exact classes without inspecting the model, 
-                # we'll just store the max prob as a generic feature.
-                prob = np.max(probs)
+                features  = np.hstack(([[sim, 2]], tfidf_vec))
+                probs     = self.model.predict_proba(features)[0]
+                prob      = float(np.max(probs))
             except Exception:
                 pass
 
         return sim, prob
 
-# Global Instance
+
+# Global singleton
 classifier = FeatureClassifier()

@@ -131,14 +131,64 @@ def api_integrity():
 
 @app.route("/api/feedback", methods=["POST"])
 def api_feedback():
+    """
+    Layer 2 manual feedback — user corrects a classification.
+    Triggers real-time weight update (apply_manual_feedback) AND persists to logger.
+    Body: { "label": "PRODUCTIVE"|"DISTRACTION", "app": "...", "title": "...",
+            "log_id": "...", "comment": "..." }
+    """
     from backend.logger import logger
-    data = request.json
+    data  = request.json or {}
+    label = data.get("label", "")
+    app   = data.get("app",   "")
+    title = data.get("title", "")
+
+    # ── Layer 2: real-time weight correction ──────────────────────────────────
+    if label in ("PRODUCTIVE", "DISTRACTION") and (app or title):
+        engine.apply_manual_feedback(app=app, title=title, correct_label=label)
+
+    # ── Persist feedback for offline retraining ───────────────────────────────
     logger.log_user_feedback(
-        log_id=data.get("log_id", ""),
-        correct_label=data.get("label", ""),
-        comment=data.get("comment", "")
+        log_id        = data.get("log_id", ""),
+        correct_label = label,
+        comment       = data.get("comment", ""),
     )
-    return jsonify({"status": "saved"})
+    return jsonify({"status": "saved", "applied": bool(label and (app or title))})
+
+
+@app.route("/api/profile")
+def api_profile():
+    """
+    Expose the current user profile and ML health state.
+    Useful for debugging learned weights and intent parsing during development.
+    Returns:
+      profile       — per-intent weight deltas and metadata
+      ml_status     — model load health
+      intent_profile — parsed intent for the current session (if active)
+    """
+    from backend.user_profile import user_profile
+    from backend.classifier  import classifier as clf
+
+    profile_data = user_profile.get_summary()
+
+    intent_info = None
+    if engine.intent_profile:
+        ip = engine.intent_profile
+        intent_info = {
+            "intent_key":       ip.intent_key,
+            "raw_intent":       ip.raw_intent,
+            "goal_verb":        ip.goal_verb,
+            "goal_subject":     ip.goal_subject,
+            "strength":         ip.strength,
+            "positive_signals": ip.positive_signals[:10],   # trim for readability
+            "negative_signals": ip.negative_signals[:10],
+        }
+
+    return jsonify({
+        "profile":        profile_data,
+        "ml_status":      clf.ml_status(),
+        "intent_profile": intent_info,
+    })
 
 
 if __name__ == "__main__":
