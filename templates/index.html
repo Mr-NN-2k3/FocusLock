@@ -10,10 +10,13 @@
 </head>
 <body>
 
+    <!-- ────────── VANTA.JS NET BACKGROUND ────────── -->
+    <div id="vanta-bg"></div>
+
     <!-- ────────── HARD DISTRACTION OVERLAY ────────── -->
     <div id="violation-overlay" class="danger-overlay hidden">
         <div class="glass-card overlay-panel state-danger overlay-center">
-            <div class="overlay-icon">🚫</div>
+            <span class="overlay-icon">🚫</span>
             <h1 class="title text-danger">Distraction Blocked</h1>
             <p class="text-muted" style="margin: 1rem 0 0.5rem;">Close the unauthorized window to resume your session.</p>
             <div id="distraction-reason" class="mono reason-box">Analyzing...</div>
@@ -22,19 +25,25 @@
 
     <!-- ────────── SOFT WARNING OVERLAY ────────── -->
     <div id="warning-overlay" class="warning-overlay hidden"></div>
-    <div id="warning-toast" class="glass-card hidden" style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 10000; padding: 15px 25px; width: auto; max-width: 90%; text-align: center; border-radius: 16px; border-color: rgba(245,158,11,0.4); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-        <strong class="text-warning" style="font-family: var(--font-display); font-size: 1.1rem; letter-spacing: 0.5px;">⚠️ Drift Detected</strong>
-        <p id="warning-reason" class="mono text-muted" style="font-size: 0.75rem; margin-top: 6px;"></p>
+    <div id="warning-toast" class="glass-card hidden" style="
+        position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+        z-index: 10000; padding: 14px 24px; width: auto; max-width: 90%;
+        text-align: center; border-radius: 50px;
+        border-color: rgba(245,158,11,0.4);
+        box-shadow: 0 0 24px rgba(245,158,11,0.25), 0 10px 40px rgba(0,0,0,0.5);
+    ">
+        <strong class="text-warning" style="font-family: var(--font-display); font-size: 1rem; letter-spacing: 0.5px;">⚠️ Drift Detected</strong>
+        <p id="warning-reason" class="mono text-muted" style="font-size: 0.72rem; margin-top: 5px;"></p>
     </div>
 
     <!-- ────────── COMPLETION OVERLAY ────────── -->
     <div id="completion-overlay" class="danger-overlay hidden" style="animation: none;">
         <div class="glass-card overlay-panel glow-purple overlay-center">
-            <div class="overlay-icon text-accent">🎉</div>
-            <h1 class="title text-accent">Session Complete</h1>
-            <p id="completion-desc" class="text-muted" style="white-space: pre-wrap; margin: 1.5rem 0; font-size: 0.95rem; line-height: 1.6;"></p>
+            <span class="overlay-icon text-accent">🎉</span>
+            <h1 class="title" style="color:#fff;">Session Complete</h1>
+            <p id="completion-desc" class="text-muted" style="white-space: pre-wrap; margin: 1.5rem 0; font-size: 0.9rem; line-height: 1.7; font-family: var(--font-mono);"></p>
             <div style="display: flex; gap: 1rem;">
-                <button id="btn-continue" class="glass-button glow-purple" style="flex: 1;">+10 MIN & STREAK</button>
+                <button id="btn-continue" class="glass-button glow-purple" style="flex: 1;">+10 MIN &amp; STREAK</button>
                 <button id="btn-stop" class="glass-button" style="flex: 1; background: transparent;">END SESSION</button>
             </div>
         </div>
@@ -43,9 +52,9 @@
     <!-- ────────── BREAK OVERLAY ────────── -->
     <div id="break-overlay" class="danger-overlay hidden" style="animation: none;">
         <div class="glass-card overlay-panel state-danger overlay-center">
-            <div class="overlay-icon">⚡</div>
+            <span class="overlay-icon">⚡</span>
             <h1 class="title text-danger">Emergency Break</h1>
-            <p class="text-muted" style="margin: 1rem 0;">Why are you breaking the contract?</p>
+            <p class="text-muted" style="margin: 1rem 0 1.5rem;">Why are you breaking the contract?</p>
             <input type="text" id="break-excuse-input" placeholder="Enter your reason..." autocomplete="off" style="margin-bottom: 1.5rem;">
             <div style="display: flex; gap: 1rem;">
                 <button id="btn-confirm-break" class="glass-button danger" style="flex: 1;">CONFIRM BREAK</button>
@@ -60,7 +69,7 @@
         <!-- Header -->
         <header class="text-center" style="margin-bottom: 2.5rem;">
             <h1 class="title">Focus<span class="text-accent">Lock</span></h1>
-            <p class="subtitle" style="margin-top: 0.5rem;">Cognitive Behavior Engine</p>
+            <p class="subtitle" style="margin-top: 0.6rem;">Cognitive Behavior Engine</p>
             <div class="stats-row" style="margin-top: 1rem;">
                 <span class="status-pill active">LVL <span id="user-level">1</span></span>
                 <span class="status-pill">XP <span id="user-xp">0</span></span>
@@ -80,20 +89,14 @@
                 </div>
                 <div class="input-group">
                     <label>Mode</label>
-                
                     <div class="glass-select" id="mode-select">
                         <div class="glass-select-trigger">
                             <span id="selected-mode">Deep Work (Strict)</span>
                             <span class="arrow">▾</span>
                         </div>
-                
                         <div class="glass-options hidden">
-                            <div class="glass-option active" data-value="deep">
-                                Deep Work (Strict)
-                            </div>
-                            <div class="glass-option" data-value="standard">
-                                Standard (Lenient)
-                            </div>
+                            <div class="glass-option active" data-value="deep">Deep Work (Strict)</div>
+                            <div class="glass-option" data-value="standard">Standard (Lenient)</div>
                         </div>
                     </div>
                 </div>
@@ -102,8 +105,7 @@
                     <input type="text" id="whitelist" placeholder="e.g. stackoverflow, docs, localhost">
                     <p class="mono hint">ONLY these keywords are allowed if set.</p>
                 </div>
-                <!-- Blacklist hidden to simplify layout per premium quiet UI rules, but still submittable if added -->
-                <button type="submit" class="glass-button glow-purple" id="btn-start" style="margin-top: 1rem; padding: 14px;">INITIALIZE ENGINE</button>
+                <button type="submit" class="glass-button glow-purple" id="btn-start" style="margin-top: 1rem; padding: 15px;">INITIALIZE ENGINE</button>
             </form>
         </div>
 
@@ -121,7 +123,7 @@
             </div>
 
             <!-- Intent Display -->
-            <div id="current-intent-display" class="inner-glass hidden" style="margin-bottom: 1.5rem; font-style: italic; font-size: 0.85rem; color: var(--text-muted); padding: 1rem;"></div>
+            <div id="current-intent-display" class="inner-glass hidden" style="margin-bottom: 1.5rem; font-style: italic; font-size: 0.85rem; color: var(--text-muted); padding: 0.9rem 1.2rem; text-align: center;"></div>
 
             <!-- Activity Telemetry -->
             <div class="activity-tracker">
@@ -140,7 +142,7 @@
                     <div class="progress-bar">
                         <div class="progress-fill" id="conf-bar"></div>
                     </div>
-                    
+
                     <div class="bar-label-wrapper" style="margin-top: 1rem;">
                         <span>SEMANTIC MATCH</span>
                         <span id="sim-text">0.00</span>
@@ -152,15 +154,47 @@
             </div>
 
             <!-- Prediction Alert -->
-            <div id="prediction-alert" class="inner-glass hidden" style="margin-top: 1.5rem; border-color: rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.05);">
+            <div id="prediction-alert" class="inner-glass hidden" style="margin-top: 1.5rem; border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.06);">
                 <strong class="text-danger" style="font-family: var(--font-display); font-size: 14px;">⚠ FAILURE PREDICTED</strong>
                 <p id="prediction-reason" class="mono text-muted" style="font-size: 11px; margin-top: 6px;"></p>
             </div>
 
-            <button id="break-btn" class="glass-button" style="margin-top: 2rem; background: transparent;">EMERGENCY BREAK</button>
+            <button id="break-btn" class="glass-button" style="margin-top: 2rem; background: transparent; border-color: rgba(255,255,255,0.08);">EMERGENCY BREAK</button>
         </div>
 
-    </div>
+    </div><!-- /#main-container -->
+
+    <!-- ────────── SCRIPTS ────────── -->
+    <!-- Three.js (required by Vanta) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <!-- Vanta NET effect -->
+    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js"></script>
+
+    <script>
+    // ── Initialize Vanta NET ──
+    // Config sourced from:
+    // vantajs.com/?effect=net#(backgroundAlpha:1,backgroundColor:2299196,
+    //   color:6643661,gyroControls:!f,maxDistance:20,minHeight:200,
+    //   minWidth:200,mouseControls:!t,points:10,scale:1,scaleMobile:1,
+    //   showDots:!t,spacing:15,touchControls:!t)
+    VANTA.NET({
+        el: '#vanta-bg',
+        mouseControls: true,
+        touchControls: true,
+        gyroControls: false,
+        minHeight: 200.00,
+        minWidth:  200.00,
+        scale: 1.00,
+        scaleMobile: 1.00,
+        backgroundColor: 0x231A1C,   // deep dark warm-black
+        color: 0x6543ED,              // vivid purple (matches --primary)
+        points: 10.00,
+        maxDistance: 20.00,
+        spacing: 15.00,
+        showDots: true,
+        backgroundAlpha: 1
+    });
+    </script>
 
     <script src="{{ url_for('static', filename='js/client.js') }}"></script>
 </body>
